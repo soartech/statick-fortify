@@ -1,0 +1,3 @@
+[Core]
+Name = Fortify Tool Plugin
+Module = fortify_tool_plugin
