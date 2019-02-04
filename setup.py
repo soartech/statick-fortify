@@ -5,8 +5,6 @@ try:
 except:  # pylint: disable=bare-except # noqa: E722 # NOLINT
     from distutils.core import setup  # pylint: disable=wrong-import-order
 
-import statick_tool.plugins
-
 with open('README.md') as f:
     long_description = f.read()  # pylint: disable=invalid-name
 
@@ -14,8 +12,8 @@ setup(
     author='Soar Technology, Inc.',
     name='statick-fortify',
     description='Statick extension to integrate Fortify.',
-    version=statick_tool.__version__,
-    packages=['statick_tool'],
+    version='0.1.0',
+    packages=['statick_tool.plugins.tool'],
     package_data={'statick_tool': ['plugins/tool/*']},
     long_description=long_description,
     long_description_content_type='text/markdown',
