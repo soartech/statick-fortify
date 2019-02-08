@@ -1,9 +1,10 @@
-"""Apply Fortify tool and gather results."""
+"""Plugin to perform analysis using MicroFocus Fortify SCA."""
 
 from __future__ import print_function
 
+import os
 import re
-import subprocess
+import sys
 
 from statick_tool.issue import Issue
 from statick_tool.tool_plugin import ToolPlugin
@@ -14,10 +15,27 @@ class FortifyToolPlugin(ToolPlugin):
 
     def get_name(self):
         """Get name of tool."""
-        return "Fortify"
+        return "fortify"
+
+    def gather_args(self, args):
+        """Gather arguments."""
+        args.add_argument("--fortify-dir", dest="fortify_dir", type=str,
+                          help="path to Fortify directory")
+        args.add_argument("--fortify-python", dest="fortify_python", type=int,
+                          help="version of Python to use for Fortify Python analysis"
+                          choices={2, 3})
+
 
     def scan(self, package, level):
         """Run tool and gather output."""
+
+        if self.plugin_context.args.fortify_dir is not None:
+            if os.path.isdir(self.plugin_context.args.fortify_dir):
+                sys.path.insert(0, self.plugin_context.args.fortify_dir)
+            else:
+                print("Provided Fortify directory {} is not a directory!",
+                      self.plugin_context.args.fortify_dir)
+
         flags = []
         flags += self.get_user_flags(level)
 
