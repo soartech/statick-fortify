@@ -51,11 +51,11 @@ class FortifyToolPlugin(ToolPlugin):
 
         with open(self.get_name() + ".log", "w") as outfile:
             if package['top_poms']:
-                maven_issues = self.scan_maven(package, outfile)
+                maven_issues = self._scan_maven(package, outfile)
                 issues += maven_issues
-            self.merge_fprs()
+            self._merge_fprs()
 
-    def scan_maven(self, package, outfile):
+    def _scan_maven(self, package, outfile):
         """Run the Fortify Maven plugin."""
 
         # Sanity check - make sure mvn exists
@@ -132,7 +132,51 @@ class FortifyToolPlugin(ToolPlugin):
             print("{}".format(ex.output))
             return
 
-    def merge_fprs(self):
+    def _fortify_python_available(self, outfile):
+        """
+        Check if Fortify is licensed to scan Python files.
+
+        Python support in Fortify is sold as part of an add-on package. Check
+        whether the user has the appropriate license or not.
+        """
+        # Create a test python file to scan
+        try:
+            output = subprocess.check_output(["touch", "statick-fortify-check.py"],
+                                             universal_newlines=True)
+            if self.plugin_context.args.show_tool_output:
+                print("{}".format(output))
+            outfile.write(output)
+
+        except subprocess.CalledProcessError as ex:
+            outfile.write(ex.output)
+            print("Couldn't create Python test file! Returncode = {}".format(ex.returncode))
+            print("{}".format(ex.output))
+            return False
+
+        # Check for the python-not-supported error
+        try:
+            output = subprocess.check_output(["sourceanalyzer", "-b",
+                                              "statick-python-check", "-python-version",
+                                              self.plugin_context.args.fortify_python,
+                                              'statick-fortify-check.py'],
+                                             stderr=subprocess.STDOUT,
+                                             universal_newlines=True)
+            if self.plugin_context.args.show_tool_output:
+                print("{}".format(output))
+            outfile.write(output)
+            if "[error]: Your license does not allow access to Fortify SCA for Python" in output:
+                # Means exactly what it sounds like. Python not available.
+                return False
+            return True
+
+        except subprocess.CalledProcessError as ex:
+            outfile.write(ex.output)
+            print("Python availability check failed! Returncode = {}".format(ex.returncode))
+            print("{}".format(ex.output))
+            return False
+            # Don't fail the plugin just for one POM failing
+
+    def _merge_fprs(self):
         """Merge all FPR files into one master FPR."""
         fpr_files = []
         for filename in os.listdir(os.getcwd()):
