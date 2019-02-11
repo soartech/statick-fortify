@@ -53,12 +53,7 @@ class FortifyToolPlugin(ToolPlugin):
             if package['top_poms']:
                 maven_issues = self.scan_maven(package, outfile)
                 issues += maven_issues
-
-            # Merge all FPR files together
-            fpr_files = []
-            for filename in os.listdir(os.getcwd()):
-                if filename.endswith('.fpr'):
-                    fpr_files.append(filename)
+            self.merge_fprs()
 
     def scan_maven(self, package, outfile):
         """Run the Fortify Maven plugin."""
@@ -66,7 +61,7 @@ class FortifyToolPlugin(ToolPlugin):
         # Sanity check - make sure mvn exists
         if not self.command_exists('mvn'):
             print("Couldn't find 'mvn' command, can't run Fortify Maven integration")
-            return []
+            return
 
         # Sanity check - make sure that the user has the Fortify plugin available
         try:
@@ -81,7 +76,7 @@ class FortifyToolPlugin(ToolPlugin):
         except subprocess.CalledProcessError as ex:
             outfile.write(ex.output)
             print("Couldn't find sca-maven-plugin! Make sure you have installed it.")
-            return []
+            return
 
         build_name = "statick-fortify-{}".format(package.name)
 
@@ -100,7 +95,7 @@ class FortifyToolPlugin(ToolPlugin):
                 outfile.write(ex.output)
                 print("mvn clean install failed! Returncode = {}".format(ex.returncode))
                 print("{}".format(ex.output))
-                return []
+                # Don't fail the plugin just for one POM failing
 
             # Run the translate stage for this POM
             try:
@@ -117,6 +112,7 @@ class FortifyToolPlugin(ToolPlugin):
                 outfile.write(ex.output)
                 print("Fortify translate failed! Returncode = {}".format(ex.returncode))
                 print("{}".format(ex.output))
+                # Don't fail the plugin just for one POM failing
 
         # Generate the overall .fpr report
         try:
@@ -134,9 +130,15 @@ class FortifyToolPlugin(ToolPlugin):
             outfile.write(ex.output)
             print("sourceanalyzer scan failed! Returncode = {}".format(ex.returncode))
             print("{}".format(ex.output))
-            return []
+            return
 
-        return []
+    def merge_fprs(self):
+        """Merge all FPR files into one master FPR."""
+        fpr_files = []
+        for filename in os.listdir(os.getcwd()):
+            if filename.endswith('.fpr'):
+                fpr_files.append(filename)
+        print(fpr_files)
 
     def parse_output(self, total_output):
         """Parse tool output and report issues."""
