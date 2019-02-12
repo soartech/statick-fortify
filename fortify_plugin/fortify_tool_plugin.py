@@ -48,10 +48,9 @@ class FortifyToolPlugin(ToolPlugin):
             return None
 
         with open(self.get_name() + ".log", "w") as outfile:
-            build_name = "statick-fortify-{}".format(package.name)
             if package['top_poms']:
                 print("  Performing Maven scan")
-                self._scan_maven(package, outfile, build_name)
+                self._scan_maven(package, outfile)
 
             if self._fortify_python_available(outfile):
                 pass
@@ -60,9 +59,9 @@ class FortifyToolPlugin(ToolPlugin):
             print("  Generating .fpr report")
             try:
                 output = subprocess.check_output(["sourceanalyzer", "-b",
-                                                  build_name, "-scan", "-f",
+                                                  self._get_build_name(package), "-scan", "-f",
                                                   "{}.fpr".format(os.path.join(os.getcwd(),
-                                                                               build_name))],
+                                                                               self._get_build_name(package)))],
                                                  stderr=subprocess.STDOUT,
                                                  universal_newlines=True)
                 if self.plugin_context.args.show_tool_output:
@@ -73,7 +72,10 @@ class FortifyToolPlugin(ToolPlugin):
                 print("sourceanalyzer scan failed! Returncode = {}".format(ex.returncode))
                 print("{}".format(ex.output))
 
-    def _scan_maven(self, package, outfile, build_name):
+    def _get_build_name(self, package):
+        return "statick-fortify-{}".format(package.name)
+
+    def _scan_maven(self, package, outfile):
         """Run the Fortify Maven plugin."""
 
         # Sanity check - make sure mvn exists
@@ -118,7 +120,7 @@ class FortifyToolPlugin(ToolPlugin):
             print("  Translating {}".format(pom))
             try:
                 output = subprocess.check_output(["sourceanalyzer", "-b",
-                                                  build_name, "mvn",
+                                                  self._get_build_name(package), "mvn",
                                                   "com.fortify.sca.plugins.maven:sca-maven-plugin:translate"],
                                                  cwd=os.path.dirname(pom),
                                                  stderr=subprocess.STDOUT,
