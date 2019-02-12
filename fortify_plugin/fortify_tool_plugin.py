@@ -53,7 +53,9 @@ class FortifyToolPlugin(ToolPlugin):
                 self._scan_maven(package, outfile)
 
             if self._fortify_python_available(outfile):
-                pass
+                print("  Fortify Python license found")
+            else:
+                print("  Fortify Python license not found")
 
             # Generate the combined .fpr
             print("  Generating .fpr report")
@@ -141,7 +143,7 @@ class FortifyToolPlugin(ToolPlugin):
         Python support in Fortify is sold as part of an add-on package. Check
         whether the user has the appropriate license or not.
         """
-        print("Checking if Fortify is licensed to scan Python...")
+        print("  Checking if Fortify is licensed to scan Python...")
         # Create a test python file to scan
         try:
             output = subprocess.check_output(["touch", "statick-fortify-check.py"],
@@ -162,6 +164,7 @@ class FortifyToolPlugin(ToolPlugin):
                                               "statick-python-check", "-python-version",
                                               "{}".format(self.plugin_context.args.fortify_python),
                                               'statick-fortify-check.py'],
+                                             stderr=subprocess.STDOUT,
                                              universal_newlines=True)
             if self.plugin_context.args.show_tool_output:
                 print("{}".format(output))
