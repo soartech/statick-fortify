@@ -47,15 +47,33 @@ class FortifyToolPlugin(ToolPlugin):
             print("Couldn't find 'FPRUtility' command, can't run Fortify plugin")
             return None
 
-        issues = []
-
         with open(self.get_name() + ".log", "w") as outfile:
+            build_name = "statick-fortify-{}".format(package.name)
             if package['top_poms']:
-                maven_issues = self._scan_maven(package, outfile)
-                issues += maven_issues
-            self._merge_fprs()
+                print("  Performing Maven scan")
+                self._scan_maven(package, outfile, build_name)
 
-    def _scan_maven(self, package, outfile):
+            if self._fortify_python_available(outfile):
+                pass
+
+            # Generate the combined .fpr
+            print("  Generating .fpr report")
+            try:
+                output = subprocess.check_output(["sourceanalyzer", "-b",
+                                                  build_name, "-scan", "-f",
+                                                  "{}.fpr".format(os.path.join(os.getcwd(),
+                                                                               build_name))],
+                                                 stderr=subprocess.STDOUT,
+                                                 universal_newlines=True)
+                if self.plugin_context.args.show_tool_output:
+                    print("{}".format(output))
+                outfile.write(output)
+            except subprocess.CalledProcessError as ex:
+                outfile.write(ex.output)
+                print("sourceanalyzer scan failed! Returncode = {}".format(ex.returncode))
+                print("{}".format(ex.output))
+
+    def _scan_maven(self, package, outfile, build_name):
         """Run the Fortify Maven plugin."""
 
         # Sanity check - make sure mvn exists
@@ -78,11 +96,10 @@ class FortifyToolPlugin(ToolPlugin):
             print("Couldn't find sca-maven-plugin! Make sure you have installed it.")
             return
 
-        build_name = "statick-fortify-{}".format(package.name)
-
         # Rebuild and translate each of the top poms
         for pom in package['top_poms']:
             # Prep for the analyzer run with a mvn clean install (recommended in the docs)
+            print("  Building {}".format(pom))
             try:
                 output = subprocess.check_output(["mvn", "clean", "install"],
                                                  cwd=os.path.dirname(pom),
@@ -98,6 +115,7 @@ class FortifyToolPlugin(ToolPlugin):
                 # Don't fail the plugin just for one POM failing
 
             # Run the translate stage for this POM
+            print("  Translating {}".format(pom))
             try:
                 output = subprocess.check_output(["sourceanalyzer", "-b",
                                                   build_name, "mvn",
@@ -114,24 +132,6 @@ class FortifyToolPlugin(ToolPlugin):
                 print("{}".format(ex.output))
                 # Don't fail the plugin just for one POM failing
 
-        # Generate the overall .fpr report
-        try:
-            output = subprocess.check_output(["sourceanalyzer", "-b",
-                                              build_name, "-scan", "-f",
-                                              "{}.fpr".format(os.path.join(os.getcwd(),
-                                                                           build_name))],
-                                             cwd=os.path.dirname(pom),
-                                             stderr=subprocess.STDOUT,
-                                             universal_newlines=True)
-            if self.plugin_context.args.show_tool_output:
-                print("{}".format(output))
-            outfile.write(output)
-        except subprocess.CalledProcessError as ex:
-            outfile.write(ex.output)
-            print("sourceanalyzer scan failed! Returncode = {}".format(ex.returncode))
-            print("{}".format(ex.output))
-            return
-
     def _fortify_python_available(self, outfile):
         """
         Check if Fortify is licensed to scan Python files.
@@ -139,6 +139,7 @@ class FortifyToolPlugin(ToolPlugin):
         Python support in Fortify is sold as part of an add-on package. Check
         whether the user has the appropriate license or not.
         """
+        print("Checking if Fortify is licensed to scan Python...")
         # Create a test python file to scan
         try:
             output = subprocess.check_output(["touch", "statick-fortify-check.py"],
@@ -157,9 +158,8 @@ class FortifyToolPlugin(ToolPlugin):
         try:
             output = subprocess.check_output(["sourceanalyzer", "-b",
                                               "statick-python-check", "-python-version",
-                                              self.plugin_context.args.fortify_python,
+                                              "{}".format(self.plugin_context.args.fortify_python),
                                               'statick-fortify-check.py'],
-                                             stderr=subprocess.STDOUT,
                                              universal_newlines=True)
             if self.plugin_context.args.show_tool_output:
                 print("{}".format(output))
@@ -174,15 +174,6 @@ class FortifyToolPlugin(ToolPlugin):
             print("Python availability check failed! Returncode = {}".format(ex.returncode))
             print("{}".format(ex.output))
             return False
-            # Don't fail the plugin just for one POM failing
-
-    def _merge_fprs(self):
-        """Merge all FPR files into one master FPR."""
-        fpr_files = []
-        for filename in os.listdir(os.getcwd()):
-            if filename.endswith('.fpr'):
-                fpr_files.append(filename)
-        print(fpr_files)
 
     def parse_output(self, total_output):
         """Parse tool output and report issues."""
