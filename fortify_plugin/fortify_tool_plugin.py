@@ -24,7 +24,7 @@ class FortifyToolPlugin(ToolPlugin):
                           help="path to Fortify directory")
         args.add_argument("--fortify-python", dest="fortify_python", type=int,
                           help="version of Python to use for Fortify Python analysis",
-                          choices={2, 3})
+                          choices={2, 3}, default=2)
         args.add_argument("--fortify-version", dest="fortify_version", type=str,
                           help="version of Fortify to use", default="18.20")
 
