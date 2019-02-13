@@ -2,8 +2,8 @@
 
 from __future__ import print_function
 
+import csv
 import os
-import re
 import subprocess
 import sys
 
@@ -52,10 +52,12 @@ class FortifyToolPlugin(ToolPlugin):
                 print("  Performing Maven scan")
                 self._scan_maven(package, outfile)
 
-            if self._fortify_python_available(outfile):
-                print("  Fortify Python license found")
-            else:
-                print("  Fortify Python license not found")
+            if package['python_src']:
+                if self._fortify_python_available(outfile):
+                    print("  Fortify Python license found")
+                    self._scan_python(package, outfile)
+                else:
+                    print("  Fortify Python license not found, can't scan Python files")
 
             # Generate the combined .fpr
             print("  Generating .fpr report")
@@ -73,6 +75,25 @@ class FortifyToolPlugin(ToolPlugin):
                 outfile.write(ex.output)
                 print("sourceanalyzer scan failed! Returncode = {}".format(ex.returncode))
                 print("{}".format(ex.output))
+                return []
+            print("  Extracting report from fpr file")
+            try:
+                output = subprocess.check_output(["FPRUtility", "-information",
+                                                  "-listIssues", "-project",
+                                                  "{}.fpr".format(os.path.join(os.getcwd(),
+                                                                               self._get_build_name(package))),
+                                                  "-search", "-queryAll", "-outputFormat",
+                                                  "CSV"],
+                                                 universal_newlines=True)
+                if self.plugin_context.args.show_tool_output:
+                    print("{}".format(output))
+                outfile.write(output)
+                return self.parse_output(output, package)
+            except subprocess.CalledProcessError as ex:
+                outfile.write(ex.output)
+                print("sourceanalyzer scan failed! Returncode = {}".format(ex.returncode))
+                print("{}".format(ex.output))
+                return []
 
     def _get_build_name(self, package):
         return "statick-fortify-{}".format(package.name)
@@ -136,6 +157,33 @@ class FortifyToolPlugin(ToolPlugin):
                 print("{}".format(ex.output))
                 # Don't fail the plugin just for one POM failing
 
+    def _scan_python(self, package, outfile):
+        """
+        Scan Python files.
+
+        Caveat: I don't actually have access to the Python plugin, so this might not be correct.
+        """
+        python_path_ext = []
+        if 'PYTHONPATH' in os.environ:
+            python_path_ext = ["-python-path", os.envrion['PYTHONPATH']]
+        for filename in package['python_src']:
+            try:
+                output = subprocess.check_output(["sourceanalyzer", "-b",
+                                                  self._get_build_name(package), "-python-version",
+                                                  "{}".format(self.plugin_context.args.fortify_python),
+                                                  filename] + python_path_ext,
+                                                 stderr=subprocess.STDOUT,
+                                                 universal_newlines=True)
+                if self.plugin_context.args.show_tool_output:
+                    print("{}".format(output))
+                outfile.write(output)
+
+            except subprocess.CalledProcessError as ex:
+                outfile.write(ex.output)
+                print("Fortify python scan failed! Returncode = {}".format(ex.returncode))
+                print("{}".format(ex.output))
+                # Don't fail for one scan failure
+
     def _fortify_python_available(self, outfile):
         """
         Check if Fortify is licensed to scan Python files.
@@ -180,18 +228,27 @@ class FortifyToolPlugin(ToolPlugin):
             print("{}".format(ex.output))
             return False
 
-    def parse_output(self, total_output):
+    def parse_output(self, output, package):
         """Parse tool output and report issues."""
-        fortify_re = r"(.+):(\d+):\s(.+)\s:\s(.+)"
-        parse = re.compile(fortify_re)
+        print(output)
+        csvreader = csv.DictReader(output.split('\n'))
+        warnings_mapping = self.load_mapping()
         issues = []
-
-        for output in total_output:
-            for line in output.split("\n"):
-                match = parse.match(line)
-                if match:
-                    issues.append(Issue(match.group(1), match.group(2),
-                                        self.get_name(), match.group(3), "5",
-                                        match.group(4), None))
+        for line in csvreader:
+            print(line)
+            if line['status'] == 'removed':
+                # It was fixed, we don't care - skip it
+                continue
+            if line['status'] is None:
+                # Bad line, skip
+                continue
+            cert_reference = None
+            if line['category'] in warnings_mapping:
+                cert_reference = warnings_mapping[line['test_id']]
+            issue_path, issue_line = line['path'].split(':')
+            print(os.path.abspath(issue_path))
+            issues.append(Issue(os.path.join(package.path, issue_path),
+                                issue_line, self.get_name(), line['analyzer'],
+                                'MEDIUM', line['category'], cert_reference))
 
         return issues
