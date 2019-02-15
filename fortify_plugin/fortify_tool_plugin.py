@@ -48,7 +48,7 @@ class FortifyToolPlugin(ToolPlugin):
             print("Couldn't find 'FPRUtility' command, can't run Fortify plugin")
             return None
 
-        with open(self.get_name() + ".log", "w") as outfile:
+        with open(self.get_name() + ".log", "wt") as outfile:
             if package['top_poms']:
                 print("  Performing Maven scan")
                 self._scan_maven(package, outfile)
@@ -70,12 +70,12 @@ class FortifyToolPlugin(ToolPlugin):
                                                  stderr=subprocess.STDOUT,
                                                  universal_newlines=True)
                 if self.plugin_context.args.show_tool_output:
-                    print("{}".format(output))
-                outfile.write(output)
+                    print("{}".format(output.encode()))
+                outfile.write(output.encode())
             except subprocess.CalledProcessError as ex:
-                outfile.write(ex.output)
+                outfile.write(ex.output.encode())
                 print("sourceanalyzer scan failed! Returncode = {}".format(ex.returncode))
-                print("{}".format(ex.output))
+                print("{}".format(ex.output.encode()))
                 return []
             print("  Extracting report from fpr file")
 
@@ -90,8 +90,8 @@ class FortifyToolPlugin(ToolPlugin):
 
             # Yes, the Zipfile spelling is deprecated, but we want it for py2.7 compatibility
             except zipfile.BadZipfile as ex:
-                outfile.write(ex.output)
-                print("  Error unzipping .fpr file: {}".format(ex.output))
+                outfile.write(ex.output.encode())
+                print("  Error unzipping .fpr file: {}".format(ex.output.encode()))
                 return []
 
             # And the .fvdl is just an XML file
@@ -118,10 +118,10 @@ class FortifyToolPlugin(ToolPlugin):
                                               "-Dversion={}".format(self.plugin_context.args.fortify_version)],
                                              universal_newlines=True)
             if self.plugin_context.args.show_tool_output:
-                print("{}".format(output))
-            outfile.write(output)
+                print("{}".format(output.encode()))
+            outfile.write(output.encode())
         except subprocess.CalledProcessError as ex:
-            outfile.write(ex.output)
+            outfile.write(ex.output.encode())
             print("Couldn't find sca-maven-plugin! Make sure you have installed it.")
             return
 
@@ -135,12 +135,12 @@ class FortifyToolPlugin(ToolPlugin):
                                                  stderr=subprocess.STDOUT,
                                                  universal_newlines=True)
                 if self.plugin_context.args.show_tool_output:
-                    print("{}".format(output))
-                outfile.write(output)
+                    print("{}".format(output.encode()))
+                outfile.write(output.encode())
             except subprocess.CalledProcessError as ex:
-                outfile.write(ex.output)
+                outfile.write(ex.output.encode())
                 print("mvn clean install failed! Returncode = {}".format(ex.returncode))
-                print("{}".format(ex.output))
+                print("{}".format(ex.output.encode()))
                 # Don't fail the plugin just for one POM failing
 
             # Run the translate stage for this POM
@@ -153,12 +153,12 @@ class FortifyToolPlugin(ToolPlugin):
                                                  stderr=subprocess.STDOUT,
                                                  universal_newlines=True)
                 if self.plugin_context.args.show_tool_output:
-                    print("{}".format(output))
-                outfile.write(output)
+                    print("{}".format(output.encode()))
+                outfile.write(output.encode())
             except subprocess.CalledProcessError as ex:
-                outfile.write(ex.output)
+                outfile.write(ex.output.encode())
                 print("Fortify translate failed! Returncode = {}".format(ex.returncode))
-                print("{}".format(ex.output))
+                print("{}".format(ex.output.encode()))
                 # Don't fail the plugin just for one POM failing
 
     def _scan_python(self, package, outfile):
@@ -179,13 +179,13 @@ class FortifyToolPlugin(ToolPlugin):
                                                  stderr=subprocess.STDOUT,
                                                  universal_newlines=True)
                 if self.plugin_context.args.show_tool_output:
-                    print("{}".format(output))
-                outfile.write(output)
+                    print("{}".format(output.encode()))
+                outfile.write(output.encode())
 
             except subprocess.CalledProcessError as ex:
-                outfile.write(ex.output)
+                outfile.write(ex.output.encode())
                 print("Fortify python scan failed! Returncode = {}".format(ex.returncode))
-                print("{}".format(ex.output))
+                print("{}".format(ex.output.encode()))
                 # Don't fail for one scan failure
 
     def _fortify_python_available(self, outfile):
@@ -201,13 +201,13 @@ class FortifyToolPlugin(ToolPlugin):
             output = subprocess.check_output(["touch", "statick-fortify-check.py"],
                                              universal_newlines=True)
             if self.plugin_context.args.show_tool_output:
-                print("{}".format(output))
-            outfile.write(output)
+                print("{}".format(output.encode()))
+            outfile.write(output.encode())
 
         except subprocess.CalledProcessError as ex:
-            outfile.write(ex.output)
+            outfile.write(ex.output.encode())
             print("Couldn't create Python test file! Returncode = {}".format(ex.returncode))
-            print("{}".format(ex.output))
+            print("{}".format(ex.output.encode()))
             return False
 
         # Check for the python-not-supported error
@@ -219,17 +219,17 @@ class FortifyToolPlugin(ToolPlugin):
                                              stderr=subprocess.STDOUT,
                                              universal_newlines=True)
             if self.plugin_context.args.show_tool_output:
-                print("{}".format(output))
-            outfile.write(output)
+                print("{}".format(output.encode()))
+            outfile.write(output.encode())
             if "[error]: Your license does not allow access to Fortify SCA for Python" in output:
                 # Means exactly what it sounds like. Python not available.
                 return False
             return True
 
         except subprocess.CalledProcessError as ex:
-            outfile.write(ex.output)
+            outfile.write(ex.output.encode())
             print("Python availability check failed! Returncode = {}".format(ex.returncode))
-            print("{}".format(ex.output))
+            print("{}".format(ex.output.encode()))
             return False
 
     def parse_output(self, xml_root, package):
