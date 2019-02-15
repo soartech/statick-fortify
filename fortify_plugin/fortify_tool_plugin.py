@@ -2,10 +2,11 @@
 
 from __future__ import print_function
 
-import csv
 import os
 import subprocess
 import sys
+import xml.etree.ElementTree as etree
+import zipfile
 
 from statick_tool.issue import Issue
 from statick_tool.tool_plugin import ToolPlugin
@@ -60,7 +61,7 @@ class FortifyToolPlugin(ToolPlugin):
                     print("  Fortify Python license not found, can't scan Python files")
 
             # Generate the combined .fpr
-            print("  Generating .fpr report")
+            print("  Generating .fpr file")
             try:
                 output = subprocess.check_output(["sourceanalyzer", "-b",
                                                   self._get_build_name(package), "-scan", "-f",
@@ -77,23 +78,26 @@ class FortifyToolPlugin(ToolPlugin):
                 print("{}".format(ex.output))
                 return []
             print("  Extracting report from fpr file")
+
+            # an fpr file is just a ZIP file with a non-standard extension
             try:
-                output = subprocess.check_output(["FPRUtility", "-information",
-                                                  "-listIssues", "-project",
-                                                  "{}.fpr".format(os.path.join(os.getcwd(),
-                                                                               self._get_build_name(package))),
-                                                  "-search", "-queryAll", "-outputFormat",
-                                                  "CSV"],
-                                                 universal_newlines=True)
-                if self.plugin_context.args.show_tool_output:
-                    print("{}".format(output))
-                outfile.write(output)
-                return self.parse_output(output, package)
-            except subprocess.CalledProcessError as ex:
+                with zipfile.ZipFile("{}.fpr".format(self._get_build_name(package)), mode='r') as fpr_zip:
+                    if 'audit.fvdl' not in fpr_zip.namelist():
+                        print("  Couldn't find audit.fvdl in fpr!")
+                        return []
+                    # audi.fvdl is the file with the actual scan results
+                    fpr_zip.extract('audit.fvdl')
+
+            # Yes, the Zipfile spelling is deprecated, but we want it for py2.7 compatibility
+            except zipfile.BadZipfile as ex:
                 outfile.write(ex.output)
-                print("sourceanalyzer scan failed! Returncode = {}".format(ex.returncode))
-                print("{}".format(ex.output))
+                print("  Error unzipping .fpr file: {}".format(ex.output))
                 return []
+
+            # And the .fvdl is just an XML file
+            tree = etree.parse('audit.fvdl')
+            root = tree.getroot()
+            self.parse_output(root, package)
 
     def _get_build_name(self, package):
         return "statick-fortify-{}".format(package.name)
@@ -228,27 +232,53 @@ class FortifyToolPlugin(ToolPlugin):
             print("{}".format(ex.output))
             return False
 
-    def parse_output(self, output, package):
-        """Parse tool output and report issues."""
-        print(output)
-        csvreader = csv.DictReader(output.split('\n'))
-        warnings_mapping = self.load_mapping()
+    def parse_output(self, xml_root, package):
+        """Parse tool XML output and report issues."""
+        ns = {"default": "xmlns://www.fortifysoftware.com/schema/fvdl"}
         issues = []
-        for line in csvreader:
-            print(line)
-            if line['status'] == 'removed':
-                # It was fixed, we don't care - skip it
-                continue
-            if line['status'] is None:
-                # Bad line, skip
-                continue
-            cert_reference = None
-            if line['category'] in warnings_mapping:
-                cert_reference = warnings_mapping[line['test_id']]
-            issue_path, issue_line = line['path'].split(':')
-            print(os.path.abspath(issue_path))
-            issues.append(Issue(os.path.join(package.path, issue_path),
-                                issue_line, self.get_name(), line['analyzer'],
-                                'MEDIUM', line['category'], cert_reference))
+        vulnerabilities = xml_root.find('default:Vulnerabilities', namespaces=ns)
+        # Load the plugin mapping if possible
+        warnings_mapping = self.load_mapping()
 
+        for vulnerability in list(vulnerabilities):
+            kingdom = vulnerability.find("default:ClassInfo/default:Kingdom", namespaces=ns).text
+            type_ = vulnerability.find("default:ClassInfo/default:Type", namespaces=ns).text
+            description = "{}, {}".format(kingdom, type_)
+            if vulnerability.find("default:ClassInfo/default:Subtype", namespaces=ns) is not None:
+                subtype = vulnerability.find("default:ClassInfo/default:Subtype", namespaces=ns).text
+                description += ", {}".format(subtype)
+
+            analyzer_name = vulnerability.find("default:ClassInfo/default:AnalyzerName", namespaces=ns).text
+            description += ", {} ".format(analyzer_name)
+            severity = vulnerability.find("default:InstanceInfo/default:InstanceSeverity", namespaces=ns).text
+            context = vulnerability.find("default:AnalysisInfo/default:Unified/default:Context", namespaces=ns)
+            default_node = vulnerability.find("default:AnalysisInfo/default:Unified/default:Trace/default:Primary/default:Entry/default:Node[@isDefault='true']",
+                                              namespaces=ns)
+            line = default_node.find('default:SourceLocation', namespaces=ns).attrib['line']
+            path = os.path.join(package.path, default_node.find('default:SourceLocation', namespaces=ns).attrib['path'])
+
+            for action_node in default_node.findall('default:Action', namespaces=ns):
+                if 'type' in action_node.attrib:
+                    description += "{}: {} ".format(action_node.attrib['type'], action_node.text)
+                else:
+                    description += "{} ".format(action_node.text)
+
+            # Pull context where possible
+            if context is not None:
+                if context.find("default:Function", namespaces=ns) is not None:
+                    function = context.find("default:Function", namespaces=ns)
+                    if 'namespace' in function.attrib:
+                        description += "in function {}, class {}.{}".format(function.attrib['name'],
+                                                                            function.attrib['namespace'],
+                                                                            function.attrib['enclosingClass'])
+                    else:
+                        description += "in function {}, class {}".format(function.attrib['name'],
+                                                                         function.attrib['enclosingClass'])
+
+                elif context.find("default:ClassIdent", namespaces=ns) is not None:
+                    class_ident = context.find("default:ClassIdent", namespaces=ns)
+                    description += "in class {}.{}".format(class_ident.attrib['namespace'],
+                                                           class_ident.attrib['name'])
+            cert_reference = warnings_mapping.get(type_, None)
+            issues.append(Issue(path, line, self.get_name(), analyzer_name, "{:.0f}".format(float(severity)), description, cert_reference))
         return issues

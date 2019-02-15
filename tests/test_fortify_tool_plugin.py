@@ -3,10 +3,12 @@ import argparse
 import os
 import subprocess
 import tempfile
+import xml.etree.ElementTree as etree
 
 import mock
 import statick_tool
 from statick_tool.config import Config
+from statick_tool.package import Package
 from statick_tool.plugin_context import PluginContext
 from statick_tool.plugins.tool.fortify_plugin.fortify_tool_plugin import \
     FortifyToolPlugin
@@ -88,3 +90,54 @@ def test_fortify_python_available_invalid():
     tmp_file = tempfile.TemporaryFile()
     with mock.patch.object(subprocess, 'check_output', side_effect=sideeffect_python_not_found):
         assert not ftp._fortify_python_available(tmp_file)
+
+
+def test_fortify_parse_class_audit():
+    """Test that we can parse a stripped-down sample fvdl file with a class vulnerability."""
+    package = Package('test', os.path.dirname(__file__))
+    ftp = setup_fortify_tool_plugin()
+    tree = etree.parse(os.path.join(os.path.dirname(__file__),
+                                    'class_audit.fvdl'))
+    root = tree.getroot()
+    issues = ftp.parse_output(root, package)
+    assert len(issues) == 1
+    assert issues[0].filename
+    assert issues[0].line_number == '542'
+    assert issues[0].tool == 'fortify'
+    assert issues[0].issue_type == 'structural'
+    assert issues[0].severity == '3'
+    assert issues[0].message
+
+
+def test_fortify_parse_function_audit():
+    """Test that we can parse a stripped-down sample fvdl file with a function vulnerability."""
+    package = Package('test', os.path.dirname(__file__))
+    ftp = setup_fortify_tool_plugin()
+    tree = etree.parse(os.path.join(os.path.dirname(__file__),
+                                    'function_audit.fvdl'))
+    root = tree.getroot()
+    issues = ftp.parse_output(root, package)
+    assert len(issues) == 1
+    assert issues[0].filename
+    assert issues[0].line_number == '279'
+    assert issues[0].tool == 'fortify'
+    assert issues[0].issue_type == 'dataflow'
+    assert issues[0].severity == '3'
+    assert issues[0].message
+
+
+def test_fortify_parse_nocontext_audit():
+    """Test that we can parse a stripped-down sample fvdl file with a vulnerability with empty context."""
+    package = Package('test', os.path.dirname(__file__))
+    ftp = setup_fortify_tool_plugin()
+    tree = etree.parse(os.path.join(os.path.dirname(__file__),
+                                    'nocontext_audit.fvdl'))
+    root = tree.getroot()
+    issues = ftp.parse_output(root, package)
+    assert len(issues) == 1
+    assert issues[0].filename
+    assert issues[0].line_number == '1'
+    assert issues[0].tool == 'fortify'
+    assert issues[0].issue_type == 'configuration'
+    assert issues[0].severity == '2'
+    assert issues[0].message

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FVDL xmlns="xmlns://www.fortifysoftware.com/schema/fvdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.12" xsi:type="FVDL">
+<CreatedTS date="2019-02-15" time="14:30:02"/>
+<UUID>4ad6366c-1e9b-4b64-9f0b-5533e1b3d21d</UUID>
+<Vulnerabilities>
+<Vulnerability>
+  <ClassInfo>
+    <ClassID>C79B7B9F-4BDD-4F79-B7DF-909BF66F2F6C</ClassID>
+    <Kingdom>Encapsulation</Kingdom>
+    <Type>Unsafe Mobile Code</Type>
+    <Subtype>Inner Class</Subtype>
+    <AnalyzerName>structural</AnalyzerName>
+    <DefaultSeverity>3.0</DefaultSeverity>
+  </ClassInfo>
+  <InstanceInfo>
+    <InstanceID>002CD629EC4DE8D797B55D63F120F20A</InstanceID>
+    <InstanceSeverity>3.0</InstanceSeverity>
+    <Confidence>5.0</Confidence>
+  </InstanceInfo>
+  <AnalysisInfo>
+    <Unified>
+      <Context>
+        <ClassIdent name="TraceView$8" namespace="org.jsoar.debugger"/>
+        <FunctionDeclarationSourceLocation path="jsoar-debugger/src/main/java/org/jsoar/debugger/TraceView.java" line="542" lineEnd="548" colStart="63" colEnd="0"/>
+      </Context>
+      <ReplacementDefinitions>
+        <Def key="EnclosingClass.name" value="TraceView$8"/>
+      </ReplacementDefinitions>
+      <Trace>
+        <Primary>
+          <Entry>
+            <Node label="Class: TraceView$8" isDefault="true">
+              <SourceLocation path="jsoar-debugger/src/main/java/org/jsoar/debugger/TraceView.java" line="542" lineEnd="548" colStart="63" colEnd="0" snippet="7214467B86A2549AF00C89330F71CA02#jsoar-debugger/src/main/java/org/jsoar/debugger/TraceView.java:542:548"/>
+              <Knowledge>
+                <Fact primary="false">Name: org.jsoar.debugger.TraceView.8</Fact>
+              </Knowledge>
+            </Node>
+          </Entry>
+        </Primary>
+      </Trace>
+    </Unified>
+  </AnalysisInfo>
+</Vulnerability>
+</Vulnerabilities>
+</FVDL>

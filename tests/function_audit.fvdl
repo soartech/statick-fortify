@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FVDL xmlns="xmlns://www.fortifysoftware.com/schema/fvdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.12" xsi:type="FVDL">
+<CreatedTS date="2019-02-15" time="14:30:02"/>
+<UUID>4ad6366c-1e9b-4b64-9f0b-5533e1b3d21d</UUID>
+<Vulnerabilities>
+<Vulnerability>
+  <ClassInfo>
+    <ClassID>B227CB65-6F20-4472-BBB7-13E157F32F6E</ClassID>
+    <Kingdom>Encapsulation</Kingdom>
+    <Type>System Information Leak</Type>
+    <Subtype>Internal</Subtype>
+    <AnalyzerName>dataflow</AnalyzerName>
+    <DefaultSeverity>3.0</DefaultSeverity>
+  </ClassInfo>
+  <InstanceInfo>
+    <InstanceID>00389C5447520E733B7B1E43B150EB5B</InstanceID>
+    <InstanceSeverity>3.0</InstanceSeverity>
+    <Confidence>5.0</Confidence>
+  </InstanceInfo>
+  <AnalysisInfo>
+    <Unified>
+      <Context>
+        <Function name="dispose" namespace="org.jsoar.kernel" enclosingClass="Agent"/>
+        <FunctionDeclarationSourceLocation path="jsoar-core/src/main/java/org/jsoar/kernel/Agent.java" line="268" lineEnd="296" colStart="5" colEnd="0"/>
+      </Context>
+      <ReplacementDefinitions>
+        <Def key="EnclosingFunction.name" value="dispose()"/>
+        <Def key="PrimaryCall.name" value="error()"/>
+        <Def key="PrimaryLocation.file" value="Agent.java"/>
+        <Def key="PrimaryLocation.line" value="279"/>
+        <LocationDef path="jsoar-core/src/main/java/org/jsoar/kernel/Agent.java" line="279" lineEnd="279" colStart="80" colEnd="0" key="PrimaryLocation"/>
+      </ReplacementDefinitions>
+      <Trace>
+        <Primary>
+          <Entry>
+            <NodeRef id="1"/>
+          </Entry>
+          <Entry>
+            <Node isDefault="true">
+              <SourceLocation path="jsoar-core/src/main/java/org/jsoar/kernel/Agent.java" line="279" lineEnd="279" colStart="80" colEnd="0" contextId="2" snippet="77F8F6D3DF11AA627DF4C81E7AE845C1#jsoar-core/src/main/java/org/jsoar/kernel/Agent.java:279:279"/>
+              <Action type="InCall">error(1)</Action>
+              <Reason>
+                <Rule ruleID="B227CB65-6F20-4472-BBB7-13E157F32F6E"/>
+              </Reason>
+              <Knowledge>
+                <Fact primary="false" type="Call">Direct : org.slf4j.Logger.error</Fact>
+                <Fact primary="false" type="TaintFlags">EXCEPTIONINFO, SYSTEMINFO</Fact>
+              </Knowledge>
+            </Node>
+          </Entry>
+        </Primary>
+      </Trace>
+    </Unified>
+  </AnalysisInfo>
+</Vulnerability>
+</Vulnerabilities>
+</FVDL>

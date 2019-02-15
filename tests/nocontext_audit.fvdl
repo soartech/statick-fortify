@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FVDL xmlns="xmlns://www.fortifysoftware.com/schema/fvdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.12" xsi:type="FVDL">
+<CreatedTS date="2019-02-15" time="14:30:02"/>
+<UUID>4ad6366c-1e9b-4b64-9f0b-5533e1b3d21d</UUID>
+<Vulnerabilities>
+<Vulnerability>
+  <ClassInfo>
+    <ClassID>FF57412F-DD28-44DE-8F4F-0AD39620768C</ClassID>
+    <Kingdom>Environment</Kingdom>
+    <Type>Build Misconfiguration</Type>
+    <Subtype>External Maven Dependency Repository</Subtype>
+    <AnalyzerName>configuration</AnalyzerName>
+    <DefaultSeverity>2.0</DefaultSeverity>
+  </ClassInfo>
+  <InstanceInfo>
+    <InstanceID>87E3EC5CC8154C006783CC461A6DDEEB</InstanceID>
+    <InstanceSeverity>2.0</InstanceSeverity>
+    <Confidence>5.0</Confidence>
+  </InstanceInfo>
+  <AnalysisInfo>
+    <Unified>
+      <Context/>
+      <Trace>
+        <Primary>
+          <Entry>
+            <Node isDefault="true">
+              <SourceLocation path="jsoar-ruby/pom.xml" line="1" colStart="0" colEnd="0" snippet="B700B3ED1BE74E872AC23B725ADD52F1#jsoar-ruby/pom.xml:1:1"/>
+              <Action>//project/repositories</Action>
+            </Node>
+          </Entry>
+        </Primary>
+      </Trace>
+    </Unified>
+  </AnalysisInfo>
+</Vulnerability>
+</Vulnerabilities>
+</FVDL>

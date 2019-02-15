@@ -1,0 +1,14 @@
+HTTP Response Splitting:IDS00-J
+Log Forging:IDS03-J
+Missing Check against Null:EXP01-J
+Missing XML Validation:IDS16-J
+Missing XML Validation:IDS17-J
+Not Implemented:VNA00-J
+Null Dereference:EXP01-J
+Password Management:MSC03-J
+Password Management Hardcoded Password:MSC03-J
+Path Manipulation:FIO16-J
+Process Control:IDS01-J
+Redundant Null Check:EXP01-J
+SQL Injection:IDS00-J
+SQL Injection Persistence:IDS00-J

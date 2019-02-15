@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FVDL xmlns="xmlns://www.fortifysoftware.com/schema/fvdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.12" xsi:type="FVDL">
+<CreatedTS date="2019-02-15" time="14:30:02"/>
+<UUID>4ad6366c-1e9b-4b64-9f0b-5533e1b3d21d</UUID>
+<Vulnerabilities>
+<Vulnerability>
+  <ClassInfo>
+    <ClassID>C79B7B9F-4BDD-4F79-B7DF-909BF66F2F6C</ClassID>
+    <Kingdom>Encapsulation</Kingdom>
+    <Type>Unsafe Mobile Code</Type>
+    <Subtype>Inner Class</Subtype>
+    <AnalyzerName>structural</AnalyzerName>
+    <DefaultSeverity>3.0</DefaultSeverity>
+  </ClassInfo>
+  <InstanceInfo>
+    <InstanceID>002CD629EC4DE8D797B55D63F120F20A</InstanceID>
+    <InstanceSeverity>3.0</InstanceSeverity>
+    <Confidence>5.0</Confidence>
+  </InstanceInfo>
+  <AnalysisInfo>
+    <Unified>
+      <Context>
+        <ClassIdent name="TraceView$8" namespace="org.jsoar.debugger"/>
+        <FunctionDeclarationSourceLocation path="jsoar-debugger/src/main/java/org/jsoar/debugger/TraceView.java" line="542" lineEnd="548" colStart="63" colEnd="0"/>
+      </Context>
+      <ReplacementDefinitions>
+        <Def key="EnclosingClass.name" value="TraceView$8"/>
+      </ReplacementDefinitions>
+      <Trace>
+        <Primary>
+          <Entry>
+            <Node label="Class: TraceView$8" isDefault="true">
+              <SourceLocation path="jsoar-debugger/src/main/java/org/jsoar/debugger/TraceView.java" line="542" lineEnd="548" colStart="63" colEnd="0" snippet="7214467B86A2549AF00C89330F71CA02#jsoar-debugger/src/main/java/org/jsoar/debugger/TraceView.java:542:548"/>
+              <Knowledge>
+                <Fact primary="false">Name: org.jsoar.debugger.TraceView.8</Fact>
+              </Knowledge>
+            </Node>
+          </Entry>
+        </Primary>
+      </Trace>
+    </Unified>
+  </AnalysisInfo>
+</Vulnerability>
+<Vulnerability>
+  <ClassInfo>
+    <ClassID>B227CB65-6F20-4472-BBB7-13E157F32F6E</ClassID>
+    <Kingdom>Encapsulation</Kingdom>
+    <Type>System Information Leak</Type>
+    <Subtype>Internal</Subtype>
+    <AnalyzerName>dataflow</AnalyzerName>
+    <DefaultSeverity>3.0</DefaultSeverity>
+  </ClassInfo>
+  <InstanceInfo>
+    <InstanceID>00389C5447520E733B7B1E43B150EB5B</InstanceID>
+    <InstanceSeverity>3.0</InstanceSeverity>
+    <Confidence>5.0</Confidence>
+  </InstanceInfo>
+  <AnalysisInfo>
+    <Unified>
+      <Context>
+        <Function name="dispose" namespace="org.jsoar.kernel" enclosingClass="Agent"/>
+        <FunctionDeclarationSourceLocation path="jsoar-core/src/main/java/org/jsoar/kernel/Agent.java" line="268" lineEnd="296" colStart="5" colEnd="0"/>
+      </Context>
+      <ReplacementDefinitions>
+        <Def key="EnclosingFunction.name" value="dispose()"/>
+        <Def key="PrimaryCall.name" value="error()"/>
+        <Def key="PrimaryLocation.file" value="Agent.java"/>
+        <Def key="PrimaryLocation.line" value="279"/>
+        <LocationDef path="jsoar-core/src/main/java/org/jsoar/kernel/Agent.java" line="279" lineEnd="279" colStart="80" colEnd="0" key="PrimaryLocation"/>
+      </ReplacementDefinitions>
+      <Trace>
+        <Primary>
+          <Entry>
+            <NodeRef id="1"/>
+          </Entry>
+          <Entry>
+            <Node isDefault="true">
+              <SourceLocation path="jsoar-core/src/main/java/org/jsoar/kernel/Agent.java" line="279" lineEnd="279" colStart="80" colEnd="0" contextId="2" snippet="77F8F6D3DF11AA627DF4C81E7AE845C1#jsoar-core/src/main/java/org/jsoar/kernel/Agent.java:279:279"/>
+              <Action type="InCall">error(1)</Action>
+              <Reason>
+                <Rule ruleID="B227CB65-6F20-4472-BBB7-13E157F32F6E"/>
+              </Reason>
+              <Knowledge>
+                <Fact primary="false" type="Call">Direct : org.slf4j.Logger.error</Fact>
+                <Fact primary="false" type="TaintFlags">EXCEPTIONINFO, SYSTEMINFO</Fact>
+              </Knowledge>
+            </Node>
+          </Entry>
+        </Primary>
+      </Trace>
+    </Unified>
+  </AnalysisInfo>
+</Vulnerability>
+<Vulnerability>
+  <ClassInfo>
+    <ClassID>FF57412F-DD28-44DE-8F4F-0AD39620768C</ClassID>
+    <Kingdom>Environment</Kingdom>
+    <Type>Build Misconfiguration</Type>
+    <Subtype>External Maven Dependency Repository</Subtype>
+    <AnalyzerName>configuration</AnalyzerName>
+    <DefaultSeverity>2.0</DefaultSeverity>
+  </ClassInfo>
+  <InstanceInfo>
+    <InstanceID>87E3EC5CC8154C006783CC461A6DDEEB</InstanceID>
+    <InstanceSeverity>2.0</InstanceSeverity>
+    <Confidence>5.0</Confidence>
+  </InstanceInfo>
+  <AnalysisInfo>
+    <Unified>
+      <Context/>
+      <Trace>
+        <Primary>
+          <Entry>
+            <Node isDefault="true">
+              <SourceLocation path="jsoar-ruby/pom.xml" line="1" colStart="0" colEnd="0" snippet="B700B3ED1BE74E872AC23B725ADD52F1#jsoar-ruby/pom.xml:1:1"/>
+              <Action>//project/repositories</Action>
+            </Node>
+          </Entry>
+        </Primary>
+      </Trace>
+    </Unified>
+  </AnalysisInfo>
+</Vulnerability>
+<Vulnerability>
+  <ClassInfo>
+    <ClassID>CA2864D7-B1AF-43EE-9990-CAA68BB14734</ClassID>
+    <Kingdom>Input Validation and Representation</Kingdom>
+    <Type>SQL Injection</Type>
+    <AnalyzerName>dataflow</AnalyzerName>
+    <DefaultSeverity>4.0</DefaultSeverity>
+  </ClassInfo>
+  <InstanceInfo>
+    <InstanceID>8782F62D8DC75D85130E25A6D517903B</InstanceID>
+    <InstanceSeverity>4.0</InstanceSeverity>
+    <Confidence>4.7999997</Confidence>
+  </InstanceInfo>
+  <AnalysisInfo>
+    <Unified>
+      <Context>
+        <Function name="addBatch" namespace="org.jsoar.util.db" enclosingClass="SoarPreparedStatement"/>
+        <FunctionDeclarationSourceLocation path="jsoar-core/src/main/java/org/jsoar/util/db/SoarPreparedStatement.java" line="84" lineEnd="86" colStart="5" colEnd="0"/>
+      </Context>
+      <ReplacementDefinitions>
+        <Def key="EnclosingFunction.name" value="addBatch()"/>
+        <Def key="PrimaryLocation.file" value="SoarPreparedStatement.java"/>
+        <Def key="PrimaryLocation.line" value="85"/>
+        <Def key="SinkFunction" value="addBatch()"/>
+        <Def key="SinkLocation.file" value="SoarPreparedStatement.java"/>
+        <Def key="SinkLocation.line" value="85"/>
+        <Def key="SourceFunction" value="readLine()"/>
+        <Def key="SourceLocation.file" value="JdbcTools.java"/>
+        <Def key="SourceLocation.line" value="157"/>
+        <LocationDef path="jsoar-core/src/main/java/org/jsoar/util/db/SoarPreparedStatement.java" line="85" lineEnd="85" colStart="21" colEnd="0" key="SinkLocation"/>
+        <LocationDef path="jsoar-core/src/main/java/org/jsoar/util/JdbcTools.java" line="157" lineEnd="157" colStart="35" colEnd="0" key="SourceLocation"/>
+      </ReplacementDefinitions>
+      <Trace>
+        <Primary>
+          <Entry>
+            <NodeRef id="899"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="900"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="891"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="892"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="893"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="894"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="896"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="897"/>
+          </Entry>
+          <Entry>
+            <Node isDefault="true">
+              <SourceLocation path="jsoar-core/src/main/java/org/jsoar/util/db/SoarPreparedStatement.java" line="85" lineEnd="85" colStart="21" colEnd="0" contextId="321" snippet="B2575259A478BA34F202E8DFC27CCAE8#jsoar-core/src/main/java/org/jsoar/util/db/SoarPreparedStatement.java:85:85"/>
+              <Action type="InCall">addBatch(0)</Action>
+              <Reason>
+                <Rule ruleID="CA2864D7-B1AF-43EE-9990-CAA68BB14734"/>
+              </Reason>
+              <Knowledge>
+                <Fact primary="false" type="Call">Direct : java.sql.Statement.addBatch</Fact>
+                <Fact primary="false" type="TaintFlags">NO_NEW_LINE, START_CHECKED_STRING, STREAM</Fact>
+              </Knowledge>
+            </Node>
+          </Entry>
+        </Primary>
+      </Trace>
+      <Trace>
+        <Primary>
+          <Entry>
+            <NodeRef id="899"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="900"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="891"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="892"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="893"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="894"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="896"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="897"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="898"/>
+          </Entry>
+          <Entry>
+            <Node isDefault="true">
+              <SourceLocation path="jsoar-core/src/main/java/org/jsoar/util/db/SoarPreparedStatement.java" line="85" lineEnd="85" colStart="21" colEnd="0" contextId="321" snippet="B2575259A478BA34F202E8DFC27CCAE8#jsoar-core/src/main/java/org/jsoar/util/db/SoarPreparedStatement.java:85:85"/>
+              <Action type="InCall">addBatch(0)</Action>
+              <Reason>
+                <Rule ruleID="CA2864D7-B1AF-43EE-9990-CAA68BB14734"/>
+              </Reason>
+              <Knowledge>
+                <Fact primary="false" type="Call">Direct : java.sql.Statement.addBatch</Fact>
+                <Fact primary="false" type="TaintFlags">NO_NEW_LINE, START_CHECKED_STRING, STREAM</Fact>
+              </Knowledge>
+            </Node>
+          </Entry>
+        </Primary>
+      </Trace>
+      <Trace>
+        <Primary>
+          <Entry>
+            <NodeRef id="899"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="900"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="891"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="892"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="893"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="894"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="896"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="897"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="898"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="898"/>
+          </Entry>
+          <Entry>
+            <Node isDefault="true">
+              <SourceLocation path="jsoar-core/src/main/java/org/jsoar/util/db/SoarPreparedStatement.java" line="85" lineEnd="85" colStart="21" colEnd="0" contextId="321" snippet="B2575259A478BA34F202E8DFC27CCAE8#jsoar-core/src/main/java/org/jsoar/util/db/SoarPreparedStatement.java:85:85"/>
+              <Action type="InCall">addBatch(0)</Action>
+              <Reason>
+                <Rule ruleID="CA2864D7-B1AF-43EE-9990-CAA68BB14734"/>
+              </Reason>
+              <Knowledge>
+                <Fact primary="false" type="Call">Direct : java.sql.Statement.addBatch</Fact>
+                <Fact primary="false" type="TaintFlags">NO_NEW_LINE, START_CHECKED_STRING, STREAM</Fact>
+              </Knowledge>
+            </Node>
+          </Entry>
+        </Primary>
+      </Trace>
+      <Trace>
+        <Primary>
+          <Entry>
+            <NodeRef id="899"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="900"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="891"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="892"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="893"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="894"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="896"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="897"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="898"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="898"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="898"/>
+          </Entry>
+          <Entry>
+            <Node isDefault="true">
+              <SourceLocation path="jsoar-core/src/main/java/org/jsoar/util/db/SoarPreparedStatement.java" line="85" lineEnd="85" colStart="21" colEnd="0" contextId="321" snippet="B2575259A478BA34F202E8DFC27CCAE8#jsoar-core/src/main/java/org/jsoar/util/db/SoarPreparedStatement.java:85:85"/>
+              <Action type="InCall">addBatch(0)</Action>
+              <Reason>
+                <Rule ruleID="CA2864D7-B1AF-43EE-9990-CAA68BB14734"/>
+              </Reason>
+              <Knowledge>
+                <Fact primary="false" type="Call">Direct : java.sql.Statement.addBatch</Fact>
+                <Fact primary="false" type="TaintFlags">NO_NEW_LINE, START_CHECKED_STRING, STREAM</Fact>
+              </Knowledge>
+            </Node>
+          </Entry>
+        </Primary>
+      </Trace>
+    </Unified>
+  </AnalysisInfo>
+</Vulnerability>
+<Vulnerability>
+  <ClassInfo>
+    <ClassID>96072BFD-0C02-4214-9984-A0D2A80A36D4</ClassID>
+    <Kingdom>Input Validation and Representation</Kingdom>
+    <Type>Setting Manipulation</Type>
+    <AnalyzerName>dataflow</AnalyzerName>
+    <DefaultSeverity>3.0</DefaultSeverity>
+  </ClassInfo>
+  <InstanceInfo>
+    <InstanceID>04E2773CDBE8B4245B3AA59544CF7132</InstanceID>
+    <InstanceSeverity>3.0</InstanceSeverity>
+    <Confidence>2.7375</Confidence>
+  </InstanceInfo>
+  <AnalysisInfo>
+    <Unified>
+      <Context>
+        <Function name="createInteger" namespace="org.jsoar.kernel.symbols" enclosingClass="SymbolFactoryImpl"/>
+        <FunctionDeclarationSourceLocation path="jsoar-core/src/main/java/org/jsoar/kernel/symbols/SymbolFactoryImpl.java" line="422" lineEnd="430" colStart="5" colEnd="0"/>
+      </Context>
+      <ReplacementDefinitions>
+        <Def key="PrimaryCall.name" value="put()"/>
+        <Def key="PrimaryLocation.file" value="SymbolFactoryImpl.java"/>
+        <Def key="PrimaryLocation.line" value="427"/>
+        <Def key="SinkFunction" value="put()"/>
+        <Def key="SinkLocation.file" value="SymbolFactoryImpl.java"/>
+        <Def key="SinkLocation.line" value="427"/>
+        <Def key="SourceFunction" value="readLong()"/>
+        <Def key="SourceLocation.file" value="ReteNetReader.java"/>
+        <Def key="SourceLocation.line" value="578"/>
+        <LocationDef path="jsoar-core/src/main/java/org/jsoar/kernel/symbols/SymbolFactoryImpl.java" line="427" lineEnd="427" colStart="37" colEnd="0" key="SinkLocation"/>
+        <LocationDef path="jsoar-core/src/main/java/org/jsoar/kernel/rete/ReteNetReader.java" line="578" lineEnd="578" colStart="47" colEnd="0" key="SourceLocation"/>
+      </ReplacementDefinitions>
+      <Trace>
+        <Primary>
+          <Entry>
+            <NodeRef id="109"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="110"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="111"/>
+          </Entry>
+          <Entry>
+            <NodeRef id="113"/>
+          </Entry>
+          <Entry>
+            <Node isDefault="true">
+              <SourceLocation path="jsoar-core/src/main/java/org/jsoar/kernel/symbols/SymbolFactoryImpl.java" line="427" lineEnd="427" colStart="37" colEnd="0" contextId="36" snippet="7C972682F1761FED9FF847C9FF5505C3#jsoar-core/src/main/java/org/jsoar/kernel/symbols/SymbolFactoryImpl.java:427:427"/>
+              <Action type="InCall">put(1)</Action>
+</Vulnerabilities>
+</FVDL>
