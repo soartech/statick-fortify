@@ -33,7 +33,7 @@ setup(
     extras_require=extras,
     url='https://github.com/soartech/statick-fortify',
     classifiers=[
-        "License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
+        "License :: OSI Approved :: BSD License",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
