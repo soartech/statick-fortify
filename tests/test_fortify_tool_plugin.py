@@ -23,6 +23,8 @@ def setup_fortify_tool_plugin():
     arg_parser.add_argument("--show-tool-output", dest="show_tool_output",
                             action="store_true", help="Show tool output")
     arg_parser.add_argument("--fortify-python", dest="fortify_python", type=int)
+    arg_parser.add_argument("--mapping-file-suffix", dest="mapping_file_suffix",
+                            default=None)
 
     resources = Resources([os.path.join(os.path.dirname(statick_tool.__file__),
                                         'plugins')])
