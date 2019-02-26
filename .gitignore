@@ -3,3 +3,5 @@ dist/
 .tox/
 *.egg-info/
 *.pyc
+output-*
+statick_output
