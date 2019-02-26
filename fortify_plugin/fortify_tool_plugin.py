@@ -41,11 +41,11 @@ class FortifyToolPlugin(ToolPlugin):
         # Sanity check - this plugin won't work without or FPRUtility
         if not self.command_exists('sourceanalyzer'):
             print("Couldn't find 'sourceanalyzer' command, can't run Fortify plugin")
-            return None
+            return []
 
         if not self.command_exists('FPRUtility'):
             print("Couldn't find 'FPRUtility' command, can't run Fortify plugin")
-            return None
+            return []
 
         with open(self.get_name() + ".log", "wt") as outfile:
             if package['top_poms']:
@@ -63,9 +63,9 @@ class FortifyToolPlugin(ToolPlugin):
             print("  Generating .fpr file")
             try:
                 output = subprocess.check_output(["sourceanalyzer", "-b",
-                                                  self._get_build_name(package), "-scan", "-f",
+                                                  _get_build_name(package), "-scan", "-f",
                                                   "{}.fpr".format(os.path.join(os.getcwd(),
-                                                                               self._get_build_name(package)))],
+                                                                               _get_build_name(package)))],
                                                  stderr=subprocess.STDOUT,
                                                  universal_newlines=True)
                 if self.plugin_context.args.show_tool_output:
@@ -80,7 +80,7 @@ class FortifyToolPlugin(ToolPlugin):
 
             # an fpr file is just a ZIP file with a non-standard extension
             try:
-                with zipfile.ZipFile("{}.fpr".format(self._get_build_name(package)), mode='r') as fpr_zip:
+                with zipfile.ZipFile("{}.fpr".format(_get_build_name(package)), mode='r') as fpr_zip:
                     if 'audit.fvdl' not in fpr_zip.namelist():
                         print("  Couldn't find audit.fvdl in fpr!")
                         return []
@@ -96,11 +96,8 @@ class FortifyToolPlugin(ToolPlugin):
             # And the .fvdl is just an XML file
             tree = etree.parse('audit.fvdl')
             root = tree.getroot()
-            self.parse_output(root, package)
-
-    def _get_build_name(self, package):
-        """Generate the name passed to Fortify."""
-        return "statick-fortify-{}".format(package.name)
+            issues = self.parse_output(root, package)
+            return issues
 
     def _scan_maven(self, package, outfile):
         """Run the Fortify Maven plugin."""
@@ -146,7 +143,7 @@ class FortifyToolPlugin(ToolPlugin):
             print("  Translating {}".format(pom))
             try:
                 output = subprocess.check_output(["sourceanalyzer", "-b",
-                                                  self._get_build_name(package), "mvn",
+                                                  _get_build_name(package), "mvn",
                                                   "com.fortify.sca.plugins.maven:sca-maven-plugin:translate"],
                                                  cwd=os.path.dirname(pom),
                                                  stderr=subprocess.STDOUT,
@@ -172,7 +169,7 @@ class FortifyToolPlugin(ToolPlugin):
         for filename in package['python_src']:
             try:
                 output = subprocess.check_output(["sourceanalyzer", "-b",
-                                                  self._get_build_name(package), "-python-version",
+                                                  _get_build_name(package), "-python-version",
                                                   "{}".format(self.plugin_context.args.fortify_python),
                                                   filename] + python_path_ext,
                                                  stderr=subprocess.STDOUT,
@@ -281,3 +278,8 @@ class FortifyToolPlugin(ToolPlugin):
             cert_reference = warnings_mapping.get(type_, None)
             issues.append(Issue(path, line, self.get_name(), analyzer_name, "{:.0f}".format(float(severity)), description, cert_reference))
         return issues
+
+
+def _get_build_name(package):
+    """Generate the name passed to Fortify."""
+    return "statick-fortify-{}".format(package.name)
