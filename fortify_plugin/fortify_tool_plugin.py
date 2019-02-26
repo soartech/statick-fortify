@@ -31,7 +31,6 @@ class FortifyToolPlugin(ToolPlugin):
 
     def scan(self, package, level):
         """Run tool and gather output."""
-
         if self.plugin_context.args.fortify_dir is not None:
             if os.path.isdir(self.plugin_context.args.fortify_dir):
                 sys.path.insert(0, self.plugin_context.args.fortify_dir)
@@ -100,11 +99,11 @@ class FortifyToolPlugin(ToolPlugin):
             self.parse_output(root, package)
 
     def _get_build_name(self, package):
+        """Generate the name passed to Fortify."""
         return "statick-fortify-{}".format(package.name)
 
     def _scan_maven(self, package, outfile):
         """Run the Fortify Maven plugin."""
-
         # Sanity check - make sure mvn exists
         if not self.command_exists('mvn'):
             print("Couldn't find 'mvn' command, can't run Fortify Maven integration")
