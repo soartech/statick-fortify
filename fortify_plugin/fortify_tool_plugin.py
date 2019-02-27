@@ -180,9 +180,8 @@ class FortifyToolPlugin(ToolPlugin):
 
             except subprocess.CalledProcessError as ex:
                 outfile.write(ex.output.encode())
-                print("Fortify python scan failed! Returncode = {}".format(ex.returncode))
-                print("{}".format(ex.output.encode()))
-                # Don't fail for one scan failure
+                print("Fortify python scan failed on file {}! Returncode = {}".format(filename, ex.returncode))
+                # Don't fail for one scan failure - Fortify particularly has issues with python files that don't end in .py
 
     def _fortify_python_available(self, outfile):
         """
