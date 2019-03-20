@@ -124,7 +124,8 @@ class FortifyToolPlugin(ToolPlugin):
             outfile.write(output.encode())
         except subprocess.CalledProcessError as ex:
             outfile.write(output.encode())
-            print("Couldn't find sca-maven-plugin! Make sure you have installed it.")
+            print("Couldn't find sca-maven-plugin! Make sure you have installed it. Error: {}".
+                  format(ex))
             return
 
         # Rebuild and translate each of the top poms
@@ -228,8 +229,7 @@ class FortifyToolPlugin(ToolPlugin):
             if self.plugin_context.args.show_tool_output:
                 print("{}".format(output.encode()))
             outfile.write(output.encode())
-            if "[error]: Your license does not allow access to Fortify SCA for Python" \
-                    in output.encode():
+            if "[error]: Your license does not allow access to Fortify SCA for Python" in output:
                 # Means exactly what it sounds like. Python not available.
                 return False
             return True
