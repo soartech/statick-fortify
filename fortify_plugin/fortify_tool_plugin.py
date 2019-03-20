@@ -272,7 +272,7 @@ class FortifyToolPlugin(ToolPlugin):
             line = default_node.find('default:SourceLocation', namespaces=namespace).attrib['line']
             path = os.path.join(package.path, default_node.find('default:SourceLocation',
                                                                 namespaces=namespace)
-                                                          .attrib['path'])
+                                .attrib['path'])
 
             for action_node in default_node.findall('default:Action', namespaces=namespace):
                 if 'type' in action_node.attrib:
