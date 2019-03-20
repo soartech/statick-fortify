@@ -35,6 +35,16 @@ jobs:
       install:
         - pip install statick
       script: mkdir statick_output; statick . statick_output --profile self_check.yaml
+    - stage: version
+      script: skip
+      python: '2.7'
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script:
+          - nvm install lts/*
+          - npm install -D semantic-release @semantic-release/exec
+          - npx semantic-release
     - stage: deploy
       python: '2.7'
       script: skip
