@@ -15,6 +15,7 @@ from statick_tool.tool_plugin import ToolPlugin
 class FortifyToolPlugin(ToolPlugin):
     """Apply Fortify tool and gather results."""
 
+# pylint: disable=no-self-use
     def get_name(self):
         """Get name of tool."""
         return "fortify"
@@ -28,8 +29,10 @@ class FortifyToolPlugin(ToolPlugin):
                           choices={2, 3}, default=2)
         args.add_argument("--fortify-version", dest="fortify_version", type=str,
                           help="version of Fortify to use", default="18.20")
+# pylint: enable=no-self-use
 
-    def scan(self, package, level):
+# pylint: disable=too-many-branches
+    def scan(self, package, _):
         """Run tool and gather output."""
         if self.plugin_context.args.fortify_dir is not None:
             if os.path.isdir(self.plugin_context.args.fortify_dir):
@@ -65,22 +68,23 @@ class FortifyToolPlugin(ToolPlugin):
                 output = subprocess.check_output(["sourceanalyzer", "-b",
                                                   _get_build_name(package), "-scan", "-f",
                                                   "{}.fpr".format(os.path.join(os.getcwd(),
-                                                                               _get_build_name(package)))],
+                                                                               _get_build_name(package)))],  # pylint: disable=line-too-long
                                                  stderr=subprocess.STDOUT,
                                                  universal_newlines=True)
                 if self.plugin_context.args.show_tool_output:
                     print("{}".format(output.encode()))
                 outfile.write(output.encode())
             except subprocess.CalledProcessError as ex:
-                outfile.write(ex.output.encode())
+                outfile.write(output.encode())
                 print("sourceanalyzer scan failed! Returncode = {}".format(ex.returncode))
-                print("{}".format(ex.output.encode()))
+                print("{}".format(output.encode()))
                 return []
             print("  Extracting report from fpr file")
 
             # an fpr file is just a ZIP file with a non-standard extension
             try:
-                with zipfile.ZipFile("{}.fpr".format(_get_build_name(package)), mode='r') as fpr_zip:
+                with zipfile.ZipFile("{}.fpr".format(_get_build_name(package)), mode='r') \
+                        as fpr_zip:
                     if 'audit.fvdl' not in fpr_zip.namelist():
                         print("  Couldn't find audit.fvdl in fpr!")
                         return []
@@ -89,8 +93,8 @@ class FortifyToolPlugin(ToolPlugin):
 
             # Yes, the Zipfile spelling is deprecated, but we want it for py2.7 compatibility
             except zipfile.BadZipfile as ex:
-                outfile.write(ex.output.encode())
-                print("  Error unzipping .fpr file: {}".format(ex.output.encode()))
+                outfile.write(ex)
+                print("  Error unzipping .fpr file: {}".format(ex))
                 return []
 
             # And the .fvdl is just an XML file
@@ -98,6 +102,7 @@ class FortifyToolPlugin(ToolPlugin):
             root = tree.getroot()
             issues = self.parse_output(root, package)
             return issues
+# pylint: enable=too-many-branches
 
     def _scan_maven(self, package, outfile):
         """Run the Fortify Maven plugin."""
@@ -111,13 +116,14 @@ class FortifyToolPlugin(ToolPlugin):
             output = subprocess.check_output(["mvn", "dependency:get",
                                               "-DgroupId=com.fortify.sca.plugins.maven",
                                               "-DartifactId=sca-maven-plugin",
-                                              "-Dversion={}".format(self.plugin_context.args.fortify_version)],
+                                              "-Dversion={}".format(self.plugin_context.args.
+                                                                    fortify_version)],
                                              universal_newlines=True)
             if self.plugin_context.args.show_tool_output:
                 print("{}".format(output.encode()))
             outfile.write(output.encode())
         except subprocess.CalledProcessError as ex:
-            outfile.write(ex.output.encode())
+            outfile.write(output.encode())
             print("Couldn't find sca-maven-plugin! Make sure you have installed it.")
             return
 
@@ -144,7 +150,8 @@ class FortifyToolPlugin(ToolPlugin):
             try:
                 output = subprocess.check_output(["sourceanalyzer", "-b",
                                                   _get_build_name(package), "mvn",
-                                                  "com.fortify.sca.plugins.maven:sca-maven-plugin:translate"],
+                                                  "com.fortify.sca.plugins.maven:"
+                                                  "sca-maven-plugin:translate"],
                                                  cwd=os.path.dirname(pom),
                                                  stderr=subprocess.STDOUT,
                                                  universal_newlines=True)
@@ -164,13 +171,16 @@ class FortifyToolPlugin(ToolPlugin):
         Caveat: I don't actually have access to the Python plugin, so this might not be correct.
         """
         python_path_ext = []
+        # pylint: disable=no-member
         if 'PYTHONPATH' in os.environ:
             python_path_ext = ["-python-path", os.envrion['PYTHONPATH']]
+        # pylint: enable=no-member
         for filename in package['python_src']:
             try:
                 output = subprocess.check_output(["sourceanalyzer", "-b",
                                                   _get_build_name(package), "-python-version",
-                                                  "{}".format(self.plugin_context.args.fortify_python),
+                                                  "{}".format(self.plugin_context
+                                                              .args.fortify_python),
                                                   filename] + python_path_ext,
                                                  stderr=subprocess.STDOUT,
                                                  universal_newlines=True)
@@ -180,8 +190,10 @@ class FortifyToolPlugin(ToolPlugin):
 
             except subprocess.CalledProcessError as ex:
                 outfile.write(ex.output.encode())
-                print("Fortify python scan failed on file {}! Returncode = {}".format(filename, ex.returncode))
-                # Don't fail for one scan failure - Fortify particularly has issues with python files that don't end in .py
+                print("Fortify python scan failed on file {}! Returncode = {}".
+                      format(filename, ex.returncode))
+                # Don't fail for one scan failure - Fortify particularly has issues with
+                # python files that don't end in .py
 
     def _fortify_python_available(self, outfile):
         """
@@ -216,7 +228,8 @@ class FortifyToolPlugin(ToolPlugin):
             if self.plugin_context.args.show_tool_output:
                 print("{}".format(output.encode()))
             outfile.write(output.encode())
-            if "[error]: Your license does not allow access to Fortify SCA for Python" in output:
+            if "[error]: Your license does not allow access to Fortify SCA for Python" \
+                    in output.encode():
                 # Means exactly what it sounds like. Python not available.
                 return False
             return True
@@ -227,41 +240,51 @@ class FortifyToolPlugin(ToolPlugin):
             print("{}".format(ex.output.encode()))
             return False
 
+# pylint: disable=too-many-locals
     def parse_output(self, xml_root, package):
         """Parse tool XML output and report issues."""
-        ns = {"default": "xmlns://www.fortifysoftware.com/schema/fvdl"}
+        namespace = {"default": "xmlns://www.fortifysoftware.com/schema/fvdl"}
         issues = []
-        vulnerabilities = xml_root.find('default:Vulnerabilities', namespaces=ns)
+        vulnerabilities = xml_root.find('default:Vulnerabilities', namespaces=namespace)
         # Load the plugin mapping if possible
         warnings_mapping = self.load_mapping()
 
         for vulnerability in list(vulnerabilities):
-            kingdom = vulnerability.find("default:ClassInfo/default:Kingdom", namespaces=ns).text
-            type_ = vulnerability.find("default:ClassInfo/default:Type", namespaces=ns).text
-            description = "{}, {}".format(kingdom, type_)
-            if vulnerability.find("default:ClassInfo/default:Subtype", namespaces=ns) is not None:
-                subtype = vulnerability.find("default:ClassInfo/default:Subtype", namespaces=ns).text
-                description += ", {}".format(subtype)
-
-            analyzer_name = vulnerability.find("default:ClassInfo/default:AnalyzerName", namespaces=ns).text
+            type_ = vulnerability.find("default:ClassInfo/default:Type",
+                                       namespaces=namespace).text
+            description = "{}, {}".format(vulnerability.find("default:ClassInfo/default:Kingdom",
+                                                             namespaces=namespace).text,
+                                          type_)
+            if vulnerability.find("default:ClassInfo/default:Subtype",
+                                  namespaces=namespace) is not None:
+                description += ", {}".format(vulnerability.find("default:ClassInfo/default:Subtype",
+                                                                namespaces=namespace).text)
+            analyzer_name = vulnerability.find("default:ClassInfo/default:AnalyzerName",
+                                               namespaces=namespace).text
             description += ", {} ".format(analyzer_name)
-            severity = vulnerability.find("default:InstanceInfo/default:InstanceSeverity", namespaces=ns).text
-            context = vulnerability.find("default:AnalysisInfo/default:Unified/default:Context", namespaces=ns)
-            default_node = vulnerability.find("default:AnalysisInfo/default:Unified/default:Trace/default:Primary/default:Entry/default:Node[@isDefault='true']",
-                                              namespaces=ns)
-            line = default_node.find('default:SourceLocation', namespaces=ns).attrib['line']
-            path = os.path.join(package.path, default_node.find('default:SourceLocation', namespaces=ns).attrib['path'])
+            severity = vulnerability.find("default:InstanceInfo/default:InstanceSeverity",
+                                          namespaces=namespace).text
+            context = vulnerability.find("default:AnalysisInfo/default:Unified/default:Context",
+                                         namespaces=namespace)
+            default_node = vulnerability.find("default:AnalysisInfo/default:Unified/default:Trace/"
+                                              "default:Primary/default:Entry/default:Node["
+                                              "@isDefault='true']", namespaces=namespace)
+            line = default_node.find('default:SourceLocation', namespaces=namespace).attrib['line']
+            path = os.path.join(package.path, default_node.find('default:SourceLocation',
+                                                                namespaces=namespace)
+                                                          .attrib['path'])
 
-            for action_node in default_node.findall('default:Action', namespaces=ns):
+            for action_node in default_node.findall('default:Action', namespaces=namespace):
                 if 'type' in action_node.attrib:
                     description += "{}: {} ".format(action_node.attrib['type'], action_node.text)
                 else:
                     description += "{} ".format(action_node.text)
 
             # Pull context where possible
+            # pylint: disable=line-too-long
             if context is not None:
-                if context.find("default:Function", namespaces=ns) is not None:
-                    function = context.find("default:Function", namespaces=ns)
+                if context.find("default:Function", namespaces=namespace) is not None:
+                    function = context.find("default:Function", namespaces=namespace)
                     if 'namespace' in function.attrib:
                         description += "in function {}, class {}.{}".format(function.attrib['name'],
                                                                             function.attrib['namespace'],
@@ -270,13 +293,17 @@ class FortifyToolPlugin(ToolPlugin):
                         description += "in function {}, class {}".format(function.attrib['name'],
                                                                          function.attrib['enclosingClass'])
 
-                elif context.find("default:ClassIdent", namespaces=ns) is not None:
-                    class_ident = context.find("default:ClassIdent", namespaces=ns)
+                elif context.find("default:ClassIdent", namespaces=namespace) is not None:
+                    class_ident = context.find("default:ClassIdent", namespaces=namespace)
                     description += "in class {}.{}".format(class_ident.attrib['namespace'],
                                                            class_ident.attrib['name'])
             cert_reference = warnings_mapping.get(type_, None)
-            issues.append(Issue(path, line, self.get_name(), analyzer_name, "{:.0f}".format(float(severity)), description, cert_reference))
+            issues.append(Issue(path, line, self.get_name(), analyzer_name,
+                                "{:.0f}".format(float(severity)), description,
+                                cert_reference))
+        # pylint: enable=line-too-long
         return issues
+# pylint: enable=too-many-locals
 
 
 def _get_build_name(package):

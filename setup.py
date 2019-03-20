@@ -8,12 +8,12 @@ except:  # pylint: disable=bare-except # noqa: E722 # NOLINT
 with open('README.md') as f:
     long_description = f.read()  # pylint: disable=invalid-name
 
-test_deps = [
+TEST_DEPS = [
     'pytest',
     'mock',
 ]
-extras = {
-    'test': test_deps,
+EXTRAS = {
+    'test': TEST_DEPS,
 }
 
 setup(
@@ -29,8 +29,8 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     install_requires=['statick'],
-    tests_require=test_deps,
-    extras_require=extras,
+    tests_require=TEST_DEPS,
+    extras_require=EXTRAS,
     url='https://github.com/soartech/statick-fortify',
     classifiers=[
         "License :: OSI Approved :: BSD License",
