@@ -35,19 +35,11 @@ jobs:
       install:
         - pip install statick
       script: mkdir statick_output; statick . statick_output --profile self_check.yaml
-    - stage: version
-      script: skip
-      python: '2.7'
-      deploy:
-        provider: script
-        skip_cleanup: true
-        script: bash ./travis_semver.sh
     - stage: deploy
-      python: '2.7'
-      script: skip
-      provider: pypi
-      user: creffett
-      password:
-        secure: "pF63cjgW43BqhUHTGzl8qWZ0IifU76MjMHU2TF7kGrga9AZL2Vx0oZG4CKlxEg7DPJWMPoUEjsIRFWH6aFIH31VyJfTYzRHrlNogEFGNbkHPg6xAJpKbbmJVR+Zpf18PjNUxCTk5VgfINB4ycafuCtvCCbIE13CinU3uZR1092ZWk2n7sOaqzzT2D3/3y7gdNHPrSzXmw0Szzv/+wVN/bQSG3UAFA+/TGU3lqYtJ+mHR6PTl5XqOFsaTinLr3zh5IZKsR0WmLWN0rCtqau1KqZFmXHeWWux8qa7VSZBVsBeKgNjF7dzVS/25nIz4czsHs9zmG/oypLxoCmbq74fTpJ8zpg0ZAm2ZEA+ksVBAKVNtHrrPgKKbxmNtmzSjT7+aVRPxD33tEmxJoa0Em0pQ+gQyzCDVqes93BiXmnwwzaETW6n7KRWRa2fvazp7RIEnjEUPXfdevx5IYOU2099N7PoTlNzx0CLDtGFSWRjhNurQOdIZVCB/v742vP3Ys9z3GY6z2w9HnsFkRPF2OhcyB+A9n3pHsquSv/DdTuWUY4YS/A4fPCgJTNELauqLZUwsRhnuCBFdUwuDCuuWa++Ts9ekDtWVM7XJT1oIMEcw2ycZXoG4v+EV5fyA598WS9O2azIIUCbZ/CISgVnLve2rl1YLP4jksmrxBt/Nzp/71+4="
-      on:
-        tags: true
+      python: '3.6'
+      install:
+        - pip install python-semantic-release
+      script: 
+        - git config --global user.name "semantic-release (via TravisCI)"
+        - git config --global user.email "semantic-release@travis"
+        - semantic-release publish
