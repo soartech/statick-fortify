@@ -20,7 +20,7 @@ setup(
     author='Soar Technology, Inc.',
     name='statick-fortify',
     description='Statick extension to integrate Fortify.',
-    version='0.1.2'
+    version='0.1.2',
     packages=['statick_tool', 'statick_tool.plugins.tool.fortify_plugin'],
     package_dir={'statick_tool.plugins.tool.fortify_plugin': 'fortify_plugin',
                  'statick_tool': '.'},
