@@ -41,10 +41,7 @@ jobs:
       deploy:
         provider: script
         skip_cleanup: true
-        script:
-          - nvm install lts/*
-          - npm install -D semantic-release @semantic-release/exec
-          - npx semantic-release
+        script: bash ./travis_semver.sh
     - stage: deploy
       python: '2.7'
       script: skip
