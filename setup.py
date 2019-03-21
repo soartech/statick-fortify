@@ -16,13 +16,13 @@ EXTRAS = {
     'test': TEST_DEPS,
 }
 
-version = '0.1.2'
+VERSION = '0.1.2'
 
 setup(
     author='Soar Technology, Inc.',
     name='statick-fortify',
     description='Statick extension to integrate Fortify.',
-    version=version,
+    version=VERSION,
     packages=['statick_tool', 'statick_tool.plugins.tool.fortify_plugin'],
     package_dir={'statick_tool.plugins.tool.fortify_plugin': 'fortify_plugin',
                  'statick_tool': '.'},
