@@ -229,7 +229,7 @@ class FortifyToolPlugin(ToolPlugin):
             if self.plugin_context.args.show_tool_output:
                 print("{}".format(output.encode()))
             outfile.write(output.encode())
-            if "[error]: Your license does not allow access to Fortify SCA for Python" in output:
+            if "[error]: Your license does not allow access to Fortify SCA for Python" in output.encode():
                 # Means exactly what it sounds like. Python not available.
                 return False
             return True
