@@ -38,7 +38,7 @@ def test_fortify_parse_function_audit(fortify_tool_plugin):
 
 
 def test_fortify_parse_nocontext_audit(fortify_tool_plugin):
-    """Test that we can parse a stripped-down sample fvdl file with a vulnerability with empty context."""
+    """Test that we can parse an fvdl file with a vulnerability with empty context."""
     package = Package('test', os.path.dirname(__file__))
     tree = etree.parse(os.path.join(os.path.dirname(__file__),
                                     'nocontext_audit.fvdl'))
