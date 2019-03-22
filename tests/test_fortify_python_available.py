@@ -5,7 +5,7 @@ import tempfile
 import mock
 
 
-def sideeffect_python_found(*args, _):
+def sideeffect_python_found(*args, **kwargs):  # pylint: disable=unused-argument
     """Custom side effect for patching subprocess.check_output."""
     if 'sourceanalyzer' in args[0]:
         return "Nothing to see here"
@@ -19,7 +19,7 @@ def test_fortify_python_available_valid(fortify_tool_plugin):
         assert fortify_tool_plugin._fortify_python_available(tmp_file)  # pylint: disable=protected-access
 
 
-def sideeffect_python_not_found(*args, _):
+def sideeffect_python_not_found(*args, **kwargs):  # pylint: disable=unused-argument
     """Custom side effect for patching subprocess.check_output."""
     if 'sourceanalyzer' in args[0]:
         return "[error]: Your license does not allow access to Fortify SCA for Python\n\
