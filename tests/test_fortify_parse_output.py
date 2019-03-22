@@ -6,6 +6,7 @@ import tempfile
 import xml.etree.ElementTree as etree
 
 import mock
+
 import statick_tool
 from statick_tool.config import Config
 from statick_tool.package import Package

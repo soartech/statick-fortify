@@ -1,9 +1,10 @@
 """Unit tests for the fortify tool module."""
 import os
 
+from yapsy.PluginManager import PluginManager
+
 import statick_tool
 from statick_tool.tool_plugin import ToolPlugin
-from yapsy.PluginManager import PluginManager
 
 
 def test_fortify_tool_plugin_found():
