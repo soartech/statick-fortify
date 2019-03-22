@@ -31,12 +31,12 @@ jobs:
       # This adds a second parallel "test" stage (since we didn't specify
       # the stage name) just to run statick
     - stage: test
-      python: '2.7'
+      python: '3.7'
       install:
         - pip install statick
       script: mkdir statick_output; statick . statick_output --profile self_check.yaml
     - stage: deploy
-      python: '3.6'
+      python: '3.7'
       install:
         - pip install python-semantic-release
       script: 
