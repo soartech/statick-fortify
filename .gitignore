@@ -5,3 +5,4 @@ dist/
 *.pyc
 output-*
 statick_output
+*.swp
