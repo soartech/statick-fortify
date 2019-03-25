@@ -109,7 +109,7 @@ class FortifyToolPlugin(ToolPlugin):
         # Sanity check - make sure mvn exists
         if not self.command_exists('mvn'):
             print("Couldn't find 'mvn' command, can't run Fortify Maven integration")
-            return
+            return False
 
         # Sanity check - make sure that the user has the Fortify plugin available
         try:
@@ -123,10 +123,13 @@ class FortifyToolPlugin(ToolPlugin):
                 print(output)
             outfile.write(output.encode())
         except subprocess.CalledProcessError as ex:
-            outfile.write(output.encode())
+            outfile.write(ex.output.encode())
             print("Couldn't find sca-maven-plugin! Make sure you have installed it. Error: {}".
                   format(ex))
-            return
+            return False
+        except OSError as ex:
+            print("Error calling maven: {}".format(ex))
+            return False
 
         # Rebuild and translate each of the top poms
         for pom in package['top_poms']:
@@ -164,6 +167,7 @@ class FortifyToolPlugin(ToolPlugin):
                 print("Fortify translate failed! Returncode = {}".format(ex.returncode))
                 print(ex.output)
                 # Don't fail the plugin just for one POM failing
+        return True
 
     def _scan_python(self, package, outfile):
         """
