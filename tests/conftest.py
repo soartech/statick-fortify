@@ -21,6 +21,8 @@ def fortify_tool_plugin():
     arg_parser.add_argument("--fortify-python", dest="fortify_python", type=int)
     arg_parser.add_argument("--mapping-file-suffix", dest="mapping_file_suffix",
                             default=None)
+    arg_parser.add_argument("--fortify-version", dest="fortify_version",
+                            default="18.20")
 
     resources = Resources([os.path.join(os.path.dirname(statick_tool.__file__),
                                         'plugins')])
