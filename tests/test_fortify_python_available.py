@@ -12,10 +12,11 @@ def sideeffect_python_found(*args, **kwargs):  # pylint: disable=unused-argument
     return ""
 
 
-def test_fortify_python_available_valid(fortify_tool_plugin):
+@mock.patch('statick_tool.plugins.tool.fortify_plugin.fortify_tool_plugin.subprocess.check_output')
+def test_fortify_python_available_valid(check_output_mock, fortify_tool_plugin):
     """Test that python_available is True if the relevant line is found."""
-    tmp_file = tempfile.TemporaryFile()
-    with mock.patch.object(subprocess, 'check_output', side_effect=sideeffect_python_found):
+    check_output_mock.side_effect = sideeffect_python_found
+    with tempfile.NamedTemporaryFile() as tmp_file:
         assert fortify_tool_plugin._fortify_python_available(tmp_file)  # pylint: disable=protected-access
 
 
@@ -33,10 +34,11 @@ at com.fortify.sca.Main$Sourceanalyzer.run(Main.java:527) [fortify-sca-18.20.107
     return ""
 
 
-def test_fortify_python_available_invalid(fortify_tool_plugin):
+@mock.patch('statick_tool.plugins.tool.fortify_plugin.fortify_tool_plugin.subprocess.check_output')
+def test_fortify_python_available_invalid(check_output_mock, fortify_tool_plugin):
     """Test that python_available is False if the output doesn't include the relevant line."""
-    tmp_file = tempfile.TemporaryFile()
-    with mock.patch.object(subprocess, 'check_output', side_effect=sideeffect_python_not_found):
+    check_output_mock.side_effect = sideeffect_python_not_found
+    with tempfile.NamedTemporaryFile() as tmp_file:
         assert not fortify_tool_plugin._fortify_python_available(tmp_file)  # pylint: disable=protected-access
 
 
