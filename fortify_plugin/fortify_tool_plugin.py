@@ -31,7 +31,7 @@ class FortifyToolPlugin(ToolPlugin):
                           help="version of Fortify to use", default="18.20")
 # pylint: enable=no-self-use
 
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches, too-many-return-statements
     def scan(self, package, _):
         """Run tool and gather output."""
         if self.plugin_context.args.fortify_dir is not None:
@@ -79,6 +79,10 @@ class FortifyToolPlugin(ToolPlugin):
                 print("sourceanalyzer scan failed! Returncode = {}".format(ex.returncode))
                 print(output)
                 return []
+            except OSError as ex:
+                print("Failed to run sourceanalyzer: {}".format(ex))
+                return []
+
             print("  Extracting report from fpr file")
 
             # an fpr file is just a ZIP file with a non-standard extension
@@ -102,14 +106,14 @@ class FortifyToolPlugin(ToolPlugin):
             root = tree.getroot()
             issues = self.parse_output(root, package)
             return issues
-# pylint: enable=too-many-branches
+# pylint: enable=too-many-branches, too-many-return-statements
 
     def _scan_maven(self, package, outfile):
         """Run the Fortify Maven plugin."""
         # Sanity check - make sure mvn exists
         if not self.command_exists('mvn'):
             print("Couldn't find 'mvn' command, can't run Fortify Maven integration")
-            return
+            return False
 
         # Sanity check - make sure that the user has the Fortify plugin available
         try:
@@ -123,10 +127,13 @@ class FortifyToolPlugin(ToolPlugin):
                 print(output)
             outfile.write(output.encode())
         except subprocess.CalledProcessError as ex:
-            outfile.write(output.encode())
+            outfile.write(ex.output.encode())
             print("Couldn't find sca-maven-plugin! Make sure you have installed it. Error: {}".
                   format(ex))
-            return
+            return False
+        except OSError as ex:
+            print("Error calling maven: {}".format(ex))
+            return False
 
         # Rebuild and translate each of the top poms
         for pom in package['top_poms']:
@@ -164,6 +171,7 @@ class FortifyToolPlugin(ToolPlugin):
                 print("Fortify translate failed! Returncode = {}".format(ex.returncode))
                 print(ex.output)
                 # Don't fail the plugin just for one POM failing
+        return True
 
     def _scan_python(self, package, outfile):
         """
@@ -195,6 +203,10 @@ class FortifyToolPlugin(ToolPlugin):
                       format(filename, ex.returncode))
                 # Don't fail for one scan failure - Fortify particularly has issues with
                 # python files that don't end in .py
+            except OSError as ex:
+                # This, on the other hand, is probably a fatal error, bail out.
+                print("Failed to run sourceanalyzer: {}".format(ex))
+                return
 
     def _fortify_python_available(self, outfile):
         """
@@ -211,6 +223,10 @@ class FortifyToolPlugin(ToolPlugin):
             if self.plugin_context.args.show_tool_output:
                 print(output)
             outfile.write(output.encode())
+
+        except OSError as ex:
+            print("Couldn't touch the python test file: {}".format(ex))
+            return False
 
         except subprocess.CalledProcessError as ex:
             outfile.write(ex.output.encode())
@@ -239,6 +255,10 @@ class FortifyToolPlugin(ToolPlugin):
             outfile.write(ex.output)
             print("Python availability check failed! Returncode = {}".format(ex.returncode))
             print(ex.output)
+            return False
+
+        except OSError as ex:
+            print("Failed to run sourceanalyzer: {}".format(ex))
             return False
 
 # pylint: disable=too-many-locals
