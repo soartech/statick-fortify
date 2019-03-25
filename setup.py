@@ -30,7 +30,7 @@ setup(
                   'statick_tool': ['rsc/plugin_mapping/*']},
     long_description=long_description,
     long_description_content_type='text/markdown',
-    install_requires=['statick'],
+    install_requires=['statick', 'backports.tempfile'],
     tests_require=TEST_DEPS,
     extras_require=EXTRAS,
     url='https://github.com/soartech/statick-fortify',

@@ -11,6 +11,11 @@ import zipfile
 from statick_tool.issue import Issue
 from statick_tool.tool_plugin import ToolPlugin
 
+try:
+    from tempfile import TemporaryDirectory
+except:  # pylint: disable=bare-except # noqa: E722 # NOLINT
+    from backports.tempfile import TemporaryDirectory  # pylint: disable=wrong-import-order
+
 
 class FortifyToolPlugin(ToolPlugin):
     """Apply Fortify tool and gather results."""
@@ -217,49 +222,38 @@ class FortifyToolPlugin(ToolPlugin):
         """
         print("  Checking if Fortify is licensed to scan Python...")
         # Create a test python file to scan
-        try:
-            output = subprocess.check_output(["touch", "statick-fortify-check.py"],
-                                             universal_newlines=True)
-            if self.plugin_context.args.show_tool_output:
-                print(output)
-            outfile.write(output.encode())
+        with TemporaryDirectory() as tmp_dir:
+            test_file = os.path.join(tmp_dir, 'statick-fortify-check.py')
+            # Open and close the file so that it's created
+            open(test_file, 'w').close()
 
-        except OSError as ex:
-            print("Couldn't touch the python test file: {}".format(ex))
-            return False
+            # Check for the python-not-supported error
+            try:
+                output = subprocess.check_output(["sourceanalyzer", "-b",
+                                                  "statick-python-check", "-python-version",
+                                                  "{}".format(self.plugin_context.args.
+                                                              fortify_python),
+                                                  test_file],
+                                                 stderr=subprocess.STDOUT,
+                                                 universal_newlines=True)
+                if self.plugin_context.args.show_tool_output:
+                    print(output)
+                outfile.write(output.encode())
+                if "[error]: Your license does not allow access to Fortify SCA for Python" \
+                        in output.splitlines():
+                    # Means exactly what it sounds like. Python not available.
+                    return False
+                return True
 
-        except subprocess.CalledProcessError as ex:
-            outfile.write(ex.output.encode())
-            print("Couldn't create Python test file! Returncode = {}".format(ex.returncode))
-            print(ex.output)
-            return False
-
-        # Check for the python-not-supported error
-        try:
-            output = subprocess.check_output(["sourceanalyzer", "-b",
-                                              "statick-python-check", "-python-version",
-                                              "{}".format(self.plugin_context.args.fortify_python),
-                                              'statick-fortify-check.py'],
-                                             stderr=subprocess.STDOUT,
-                                             universal_newlines=True)
-            if self.plugin_context.args.show_tool_output:
-                print(output)
-            outfile.write(output.encode())
-            if "[error]: Your license does not allow access to Fortify SCA for Python" \
-                    in output.splitlines():
-                # Means exactly what it sounds like. Python not available.
+            except subprocess.CalledProcessError as ex:
+                outfile.write(ex.output.encode())
+                print("Python availability check failed! Returncode = {}".format(ex.returncode))
+                print(ex.output)
                 return False
-            return True
 
-        except subprocess.CalledProcessError as ex:
-            outfile.write(ex.output)
-            print("Python availability check failed! Returncode = {}".format(ex.returncode))
-            print(ex.output)
-            return False
-
-        except OSError as ex:
-            print("Failed to run sourceanalyzer: {}".format(ex))
-            return False
+            except OSError as ex:
+                print("Failed to run sourceanalyzer: {}".format(ex))
+                return False
 
 # pylint: disable=too-many-locals
     def parse_output(self, xml_root, package):
