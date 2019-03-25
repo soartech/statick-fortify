@@ -31,7 +31,7 @@ class FortifyToolPlugin(ToolPlugin):
                           help="version of Fortify to use", default="18.20")
 # pylint: enable=no-self-use
 
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches, too-many-return-statements
     def scan(self, package, _):
         """Run tool and gather output."""
         if self.plugin_context.args.fortify_dir is not None:
@@ -106,7 +106,7 @@ class FortifyToolPlugin(ToolPlugin):
             root = tree.getroot()
             issues = self.parse_output(root, package)
             return issues
-# pylint: enable=too-many-branches
+# pylint: enable=too-many-branches, too-many-return-statements
 
     def _scan_maven(self, package, outfile):
         """Run the Fortify Maven plugin."""
