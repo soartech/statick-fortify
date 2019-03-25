@@ -38,3 +38,19 @@ def test_fortify_python_available_invalid(fortify_tool_plugin):
     tmp_file = tempfile.TemporaryFile()
     with mock.patch.object(subprocess, 'check_output', side_effect=sideeffect_python_not_found):
         assert not fortify_tool_plugin._fortify_python_available(tmp_file)  # pylint: disable=protected-access
+
+
+@mock.patch('statick_tool.plugins.tool.fortify_plugin.fortify_tool_plugin.subprocess.check_output')
+def test_fortify_python_available_touch_oserror(check_output_mock, fortify_tool_plugin):
+    """Test that python_available is False if the output triggers an oserror."""
+    check_output_mock.side_effect = OSError("error")
+    with tempfile.NamedTemporaryFile() as tmp_file:
+        assert not fortify_tool_plugin._fortify_python_available(tmp_file)  # pylint: disable=protected-access
+
+
+@mock.patch('statick_tool.plugins.tool.fortify_plugin.fortify_tool_plugin.subprocess.check_output')
+def test_fortify_python_available_touch_calledprocesserror(check_output_mock, fortify_tool_plugin):
+    """Test that python_available is False if touch (test file) triggers a calledprocesserror."""
+    check_output_mock.side_effect = subprocess.CalledProcessError(1, "error", output="Error")
+    with tempfile.NamedTemporaryFile() as tmp_file:
+        assert not fortify_tool_plugin._fortify_python_available(tmp_file)  # pylint: disable=protected-access
