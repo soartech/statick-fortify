@@ -79,6 +79,10 @@ class FortifyToolPlugin(ToolPlugin):
                 print("sourceanalyzer scan failed! Returncode = {}".format(ex.returncode))
                 print(output)
                 return []
+            except OSError as ex:
+                print("Failed to run sourceanalyzer: {}".format(ex))
+                return []
+
             print("  Extracting report from fpr file")
 
             # an fpr file is just a ZIP file with a non-standard extension
@@ -199,6 +203,10 @@ class FortifyToolPlugin(ToolPlugin):
                       format(filename, ex.returncode))
                 # Don't fail for one scan failure - Fortify particularly has issues with
                 # python files that don't end in .py
+            except OSError as ex:
+                # This, on the other hand, is probably a fatal error, bail out.
+                print("Failed to run sourceanalyzer: {}".format(ex))
+                return
 
     def _fortify_python_available(self, outfile):
         """
@@ -215,6 +223,10 @@ class FortifyToolPlugin(ToolPlugin):
             if self.plugin_context.args.show_tool_output:
                 print(output)
             outfile.write(output.encode())
+
+        except OSError as ex:
+            print("Couldn't touch the python test file: {}".format(ex))
+            return False
 
         except subprocess.CalledProcessError as ex:
             outfile.write(ex.output.encode())
@@ -243,6 +255,10 @@ class FortifyToolPlugin(ToolPlugin):
             outfile.write(ex.output)
             print("Python availability check failed! Returncode = {}".format(ex.returncode))
             print(ex.output)
+            return False
+
+        except OSError as ex:
+            print("Failed to run sourceanalyzer: {}".format(ex))
             return False
 
 # pylint: disable=too-many-locals
