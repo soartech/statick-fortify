@@ -55,7 +55,7 @@ class FortifyToolPlugin(ToolPlugin):
             print("Couldn't find 'FPRUtility' command, can't run Fortify plugin")
             return []
 
-        with open(self.get_name() + ".log", "wt") as outfile:
+        with open(self.get_name() + ".log", "wb") as outfile:
             if package['top_poms']:
                 print("  Performing Maven scan")
                 self._scan_maven(package, outfile)
