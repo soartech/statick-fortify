@@ -80,9 +80,9 @@ class FortifyToolPlugin(ToolPlugin):
                     print(output)
                 outfile.write(output.encode())
             except subprocess.CalledProcessError as ex:
-                outfile.write(output.encode())
+                outfile.write(ex.output.encode())
                 print("sourceanalyzer scan failed! Returncode = {}".format(ex.returncode))
-                print(output)
+                print(ex.output)
                 return []
             except OSError as ex:
                 print("Failed to run sourceanalyzer: {}".format(ex))
