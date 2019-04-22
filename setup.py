@@ -16,7 +16,7 @@ EXTRAS = {
     'test': TEST_DEPS,
 }
 
-VERSION = '0.1.4'
+VERSION = '0.1.5'
 
 setup(
     author='Soar Technology, Inc.',
