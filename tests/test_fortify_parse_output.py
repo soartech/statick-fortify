@@ -11,7 +11,7 @@ def test_fortify_parse_class_audit(fortify_tool_plugin):
     tree = etree.parse(os.path.join(os.path.dirname(__file__),
                                     'class_audit.fvdl'))
     root = tree.getroot()
-    issues = fortify_tool_plugin.parse_output(root, package)
+    issues = fortify_tool_plugin.parse_tool_output(root, package)
     assert len(issues) == 1
     assert issues[0].filename
     assert issues[0].line_number == '542'
@@ -27,7 +27,7 @@ def test_fortify_parse_function_audit(fortify_tool_plugin):
     tree = etree.parse(os.path.join(os.path.dirname(__file__),
                                     'function_audit.fvdl'))
     root = tree.getroot()
-    issues = fortify_tool_plugin.parse_output(root, package)
+    issues = fortify_tool_plugin.parse_tool_output(root, package)
     assert len(issues) == 1
     assert issues[0].filename
     assert issues[0].line_number == '279'
@@ -43,7 +43,7 @@ def test_fortify_parse_nocontext_audit(fortify_tool_plugin):
     tree = etree.parse(os.path.join(os.path.dirname(__file__),
                                     'nocontext_audit.fvdl'))
     root = tree.getroot()
-    issues = fortify_tool_plugin.parse_output(root, package)
+    issues = fortify_tool_plugin.parse_tool_output(root, package)
     assert len(issues) == 1
     assert issues[0].filename
     assert issues[0].line_number == '1'
