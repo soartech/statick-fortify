@@ -109,7 +109,7 @@ class FortifyToolPlugin(ToolPlugin):
             # And the .fvdl is just an XML file
             tree = etree.parse('audit.fvdl')
             root = tree.getroot()
-            issues = self.parse_output(root, package)
+            issues = self.parse_tool_output(root, package)
             return issues
 # pylint: enable=too-many-branches, too-many-return-statements
 
@@ -256,7 +256,7 @@ class FortifyToolPlugin(ToolPlugin):
                 return False
 
 # pylint: disable=too-many-locals
-    def parse_output(self, xml_root, package):
+    def parse_tool_output(self, xml_root, package):
         """Parse tool XML output and report issues."""
         namespace = {"default": "xmlns://www.fortifysoftware.com/schema/fvdl"}
         issues = []
